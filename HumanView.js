@@ -11,6 +11,10 @@ import {
 var iface = {
     name: 'HumanImageView',
     propTypes: {
+      hipWidth: PropTypes.number,
+      fullHeight: PropTypes.number,
+      waistWidth: PropTypes.number,
+      chestWidth: PropTypes.number,
 	    ...ViewPropTypes
     },
 };

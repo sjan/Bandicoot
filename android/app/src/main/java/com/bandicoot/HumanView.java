@@ -29,28 +29,31 @@ public class HumanView extends View {
             + "369.84495,734.50551 363.04495,888.50551 381.04495,943.30551 H 335.64495 "
             + "L 338.84495,878.70551 329.44495,718.10551 318.94495,607.50551 312.94495,600.60551 "
             + "308.44495,561.10551 Z";
-    private static final int RIGHT_HIP_INDEX = 42;
-    private static final int LEFT_HIP_INDEX = 13;
-    private static final int RIGHT_WAIST_INDEX = 43;
-    private static final int LEFT_WAIST_INDEX = 11;
+    private static final int RIGHT_WAIST_INDEX = 42;
+    private static final int RIGHT_HIP_INDEX = 43;
+    private static final int RIGHT_CHEST_INDEX = 33;
+    private static final int RIGHT_CHEST_UPPER = 41;
+
+    private static final int LEFT_WAIST_INDEX = 13;
+    private static final int LEFT_HIP_INDEX = 11;
+    private static final int LEFT_CHEST_INDEX = 14;
+    private static final int LEFT_CHEST_UPPER = 22;
 
     float minXPoint = 161;
+    float maxXPoint = 289;
     float minYPoint = 80;
-    float maxX = 289;
-    float maxY = 863;
+    float maxYPoint = 863;
 
     private static final String TAG = HumanView.class.getSimpleName();
 
     private List<Point> list;
-    private int chestSize = 0;
-    private int hipSize = 0;
-    private int waistSize = 0;
+    private int waistVectorWidth = 0;
+    private int hipVectorWidth = 0;
+    private int heightVector = 0;
 
-    private static final int LEFT_CHEST_INDEX = 14;
-    private static final int LEFT_CHEST_UPPER = 22;
-    private static final int RIGHT_CHEST_INDEX = 33;
-    private static final int RIGHT_CHEST_UPPER = 41;
+    private int chestVectorWidth;
 
+    private float CONVERSION_FACTOR = 2.8f;
 
     public HumanView(Context context) {
         this(context, null);
@@ -74,12 +77,10 @@ public class HumanView extends View {
         Log.d(TAG, "parse");
 
         List<Point> list = new ArrayList<>();
-
         String tokens[] = shape.split(" ");
         String command = null;
         Float lastY = 0f;
         for (String s : tokens) {
-
             if (s.matches("[A-Z]")) {
                 Log.d(TAG, "cap letter " + s);
                 command = s;
@@ -92,7 +93,7 @@ public class HumanView extends View {
                     Float doubleX = Float.parseFloat(x);
                     String y = coordinate[1];
 
-                    Float doubleY = Float.parseFloat(y);
+                    Float doubleY = Float.parseFloat(y)-80f;
                     lastY = doubleY;
                     Log.d(TAG, "coordinates " + doubleX + " " + doubleY);
                     list.add(new Point(doubleX, doubleY));
@@ -101,7 +102,6 @@ public class HumanView extends View {
                 if (command != null && command.equals("H")) {
                     Float doubleX = Float.parseFloat(s);
                     Log.d(TAG, "coordinates " + doubleX + " " + lastY);
-
                     list.add(new Point(doubleX, lastY));
                 }
             }
@@ -128,73 +128,96 @@ public class HumanView extends View {
     }
 
     private Path drawHuman(int width, int height) {
+        Log.d(TAG, "Canvas h:" + height + " w:" + width);
+        Log.d(TAG, "Measured h:" + this.getMeasuredHeight() + " w:" + this.getMeasuredWidth());
+
         Path newpath = new Path();
         if(!newpath.isEmpty()) {
             newpath.rewind();
         }
 
-        float imageWidthX = maxX- minXPoint;
-        float imageHeightY = maxY- minYPoint;
+        float imageWidthX = maxXPoint - minXPoint;
+        float imageHeightY = maxYPoint - minYPoint;
 
         float offsetX = width/2- minXPoint -(imageWidthX);
         float offsetY = -minYPoint +height/2-imageHeightY/2;
 
         for (int i=0;i<list.size();i++) {
             Point p = list.get(i);
-            Float x = p.x + offsetX;
-            Float y = p.y + offsetY;
+            Float x = (p.x + offsetX);
+            Float y = (p.y + offsetY) * scaleFactor(heightVector);
 
             if (newpath.isEmpty()) {
                 newpath.moveTo(x, y);
             } else {
-                if(i>= LEFT_CHEST_INDEX && i <= LEFT_CHEST_INDEX+8) {
-                    x = x - chestSize;
-                } else if(i>= RIGHT_CHEST_INDEX && i <= RIGHT_CHEST_INDEX+8) {
-                    x = x + chestSize;
-                }
-
-                //hip
-                if(i == LEFT_HIP_INDEX) {
-                    x = x - hipSize;
-                } else if(i == RIGHT_HIP_INDEX) {
-                    x = x + hipSize;
+                if(i>= LEFT_CHEST_INDEX && i <= LEFT_CHEST_UPPER) {
+                    x = x - computeChestDelta(chestVectorWidth);
+                } else if(i>= RIGHT_CHEST_INDEX && i <= RIGHT_CHEST_UPPER) {
+                    x = x + computeChestDelta(chestVectorWidth);
                 }
 
                 //waist
-                if(i>=LEFT_WAIST_INDEX && i <= LEFT_WAIST_INDEX +1) {
-                    x = x - waistSize;
-                } else if(i>=RIGHT_WAIST_INDEX && i <= RIGHT_WAIST_INDEX +1) {
-                    x = x + waistSize;
+                if(i == LEFT_WAIST_INDEX) {
+                    x = x - computeWaistDelta(waistVectorWidth);
+                } else if(i == RIGHT_WAIST_INDEX) {
+                    x = x + computeWaistDelta(waistVectorWidth);
+                }
+
+                //hip
+                if(i>= LEFT_HIP_INDEX && i <= LEFT_HIP_INDEX +1) {
+                    x = x - computeHipDelta(hipVectorWidth);
+                } else if(i>= RIGHT_HIP_INDEX && i <= RIGHT_HIP_INDEX +1) {
+                    x = x + computeHipDelta(hipVectorWidth);
                 }
 
                 newpath.lineTo(x, y);
             }
         }
+
         newpath.close();
         return newpath;
     }
 
+    private float scaleFactor(int heightVector) {
+        Log.d(TAG, "height " + Float.valueOf(heightVector/783f));
+        return Float.valueOf(heightVector/783f);
+    }
 
-    public  void waistValue(int value) {
-        this.waistSize = value;
+    private Float computeChestDelta(int chestWidth) {
+        return Float.valueOf(chestWidth/2)-70;
+    }
+
+    private Float computeHipDelta(int hipSize) {
+        return Float.valueOf(hipSize/2)-68;
+    }
+
+    private Float computeWaistDelta(int waistSize) {
+        Float f = Float.valueOf(waistSize/2)-64;
+        return f;
+    }
+
+    public  void waistWidthCM(int value) {
+        this.waistVectorWidth = computeVectorDistance(value);
         this.invalidate();
     }
 
-    public void hipValue(int value) {
-        this.hipSize = value;
+    public void hipWidthCM(int value) {
+        this.hipVectorWidth = computeVectorDistance(value);
         this.invalidate();
     }
 
-    public void chestValue(int circumfrance) {
-        this.chestSize = circumfrance;
+    public void chestWidthCM(int cmValue) {
+        this.chestVectorWidth = computeVectorDistance(cmValue);
         this.invalidate();
     }
 
-    public void heightValue(int height) {
-        this.invalidate();
+    private int computeVectorDistance(int centimeterValue) {
+        Log.d(TAG, centimeterValue + " converted into " + centimeterValue*CONVERSION_FACTOR);
+        return Math.round(centimeterValue*CONVERSION_FACTOR);
     }
 
-    public void inseamValue(int inseam) {
+    public void heightCM(int centimeterValue) {
+        this.heightVector = computeVectorDistance(centimeterValue);
         this.invalidate();
     }
 }

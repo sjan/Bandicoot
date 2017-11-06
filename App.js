@@ -14,7 +14,7 @@ export default class App extends React.Component {
   }
 
   slidingChest(itemSelected) {
-    this.setState({chest: itemSelected})
+    this.setState({chest: itemSelected});
   }
 
   slidingWaist(itemSelected) {
@@ -30,96 +30,102 @@ export default class App extends React.Component {
   }
 
   render() {
+
     return (
-      <View style={{flex: 1, flexDirection: 'column'}}>
-      <HumanImageView style={{flex: 7, backgroundColor: 'skyblue'}} />
-      <View style={styles.slider_controller_container} >
-      <Image
-      source={require('./my-icon.png')}
-      style={styles.slider_controller_icon} />
-      <View style={styles.slider_controller_sub_container}>
-      <Text>Chest: {this.state.chest}cm</Text>
-      <Slider
-      maximumValue = {chest.max}
-      minimumValue = {chest.min}
-      step = {chest.step}
-      value = {chest.default}
-      onValueChange = {(val) => {this.slidingChest(val)}}/>
-      </View>
-      </View>
-      <View style={styles.slider_controller_container} >
-      <Image
-      source={require('./my-icon.png')}
-      style={styles.slider_controller_icon} />
-      <View style={styles.slider_controller_sub_container}>
-      <Text>Waist: {this.state.waist}cm</Text>
-      <Slider
-      maximumValue = {waist.max}
-      minimumValue = {waist.min}
-      value = {waist.default}
-      step = {waist.step}
-      onValueChange = {(val) => {this.slidingWaist(val)}}/>
-      </View>
-      </View>
-      <View style={styles.slider_controller_container} >
-      <Image
-      source={require('./my-icon.png')}
-      style={styles.slider_controller_icon} />
-      <View style={styles.slider_controller_sub_container}>
-      <Text>Hip: {this.state.hip}cm</Text>
-      <Slider
-      maximumValue = {hip.max}
-      minimumValue = {hip.min}
-      value = {hip.default}
-      step = {hip.step}
-      onValueChange = {(val) => {this.slidingHip(val)}}/>
-      </View>
-      </View>
-      <View style={styles.slider_controller_container} >
-      <Image
-      source={require('./my-icon.png')}
-      style={styles.slider_controller_icon} />
-      <View style={styles.slider_controller_sub_container}>
-      <Text>Height: {this.state.height}cm</Text>
-      <Slider
-      maximumValue = {height.max}
-      minimumValue = {height.min}
-      value = {height.default}
-      step = {height.step}
-      onValueChange = {(val) => {this.slidingHeight(val)}}/>
-      </View>
-      </View>
+      <View style= {{flex: 1, flexDirection: 'column'}}>
+        <HumanImageView
+          chestWidth= {this.state.chest}
+          waistWidth= {this.state.waist}
+          hipWidth= {this.state.hip}
+          fullHeight= {this.state.height}
+          style= {{flex: 7, backgroundColor: 'skyblue'}} />
+        <View style={styles.slider_controller_container} >
+          <Image
+            source={require('./my-icon.png')}
+            style={styles.slider_controller_icon} />
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Chest: {this.state.chest}cm</Text>
+            <Slider
+              maximumValue = {chest.max}
+              minimumValue = {chest.min}
+              step = {chest.step}
+              value = {chest.default}
+              onValueChange = {(val) => {this.slidingChest(val)}}/>
+          </View>
+        </View>
+        <View style={styles.slider_controller_container} >
+          <Image
+            source={require('./my-icon.png')}
+            style={styles.slider_controller_icon} />
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Waist: {this.state.waist}cm</Text>
+            <Slider
+              maximumValue = {waist.max}
+              minimumValue = {waist.min}
+              value = {waist.default}
+              step = {waist.step}
+              onValueChange = {(val) => {this.slidingWaist(val)}}/>
+          </View>
+        </View>
+        <View style={styles.slider_controller_container} >
+          <Image
+            source={require('./my-icon.png')}
+            style={styles.slider_controller_icon} />
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Hip: {this.state.hip}cm</Text>
+            <Slider
+              maximumValue = {hip.max}
+              minimumValue = {hip.min}
+              value = {hip.default}
+              step = {hip.step}
+              onValueChange = {(val) => {this.slidingHip(val)}}/>
+          </View>
+        </View>
+        <View style={styles.slider_controller_container} >
+          <Image
+            source={require('./my-icon.png')}
+            style={styles.slider_controller_icon} />
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Height: {this.state.height}cm</Text>
+            <Slider
+              maximumValue = {height.max}
+              minimumValue = {height.min}
+              value = {height.default}
+              step = {height.step}
+              onValueChange = {(val) => {this.slidingHeight(val)}}/>
+          </View>
+        </View>
       </View>
     );
   }
 }
 
 const chest = {
-  min: 60,
-  max: 120,
+  min: 30,
+  max: 80,
   step: 1,
-  default: 100
+  default: 50
 }
 
 const hip = {
-  min: 70,
-  max: 130,
+  min: 30,
+  max: 80,
   step: 1,
-  default: 90
-}
-
-const height = {
-  min: 120,
-  max: 200,
-  step: 1,
-  default: 180
+  default: 50
 }
 
 const waist = {
-  min: 50,
-  max: 110,
+  min: 30,
+  max: 80,
   step: 1,
-  default: 80
+  default: 50
+}
+
+const height = {
+  min: 30,
+  max: 300,
+  step: 1,
+  default: 279
 }
 
 const styles = StyleSheet.create({
