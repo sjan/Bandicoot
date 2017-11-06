@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlatList, StyleSheet, Text, View, Slider, Image } from 'react-native';
+import HumanImageView from './HumanView';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -31,7 +32,7 @@ export default class App extends React.Component {
   render() {
     return (
       <View style={{flex: 1, flexDirection: 'column'}}>
-      <View style={{flex: 6, backgroundColor: 'skyblue'}} />
+      <HumanImageView style={{flex: 7, backgroundColor: 'skyblue'}} />
       <View style={styles.slider_controller_container} >
       <Image
       source={require('./my-icon.png')}
