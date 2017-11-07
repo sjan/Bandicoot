@@ -122,10 +122,10 @@ const waist = {
 }
 
 const height = {
-  min: 30,
-  max: 300,
+  min: 120, //4 feet
+  max: 350, //11 ft
   step: 1,
-  default: 279
+  default: 279 //9feet
 }
 
 const styles = StyleSheet.create({

@@ -9,8 +9,8 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class HumanView extends View {
     private static final String HUMAN_SHAPE =
@@ -39,21 +39,28 @@ public class HumanView extends View {
     private static final int LEFT_CHEST_INDEX = 14;
     private static final int LEFT_CHEST_UPPER = 22;
 
-    float minXPoint = 161;
-    float maxXPoint = 289;
-    float minYPoint = 80;
-    float maxYPoint = 863;
+    private static final Float CHEST_WIDTH = 140f;
+    private static final Float HIP_WIDTH = 136f;
+    private static final Float WAIST_WIDTH = 128f;
+
+    Float X_MIN_POINT = Float.MAX_VALUE;
+    Float X_MAX_POINT = Float.MIN_VALUE;
+    Float Y_MIN_POINT = Float.MAX_VALUE;
+    Float Y_MAX_POINT = Float.MIN_VALUE;
+    Float X_WIDTH;
+    Float Y_HEIGHT;
 
     private static final String TAG = HumanView.class.getSimpleName();
 
-    private List<Point> list;
+    private List<Point> pointList;
     private int waistVectorWidth = 0;
     private int hipVectorWidth = 0;
     private int heightVector = 0;
 
     private int chestVectorWidth;
+    private Paint paint = new Paint();
 
-    private float CONVERSION_FACTOR = 2.8f;
+    private final float CONVERSION_FACTOR = 2.8f;
 
     public HumanView(Context context) {
         this(context, null);
@@ -70,49 +77,60 @@ public class HumanView extends View {
     }
 
     private void init() {
-        list = parse(HUMAN_SHAPE);
+        pointList = parse(HUMAN_SHAPE);
     }
 
     private List<Point> parse(String shape) {
         Log.d(TAG, "parse");
 
-        List<Point> list = new ArrayList<>();
+        Stack<Point> pointStack = new Stack<>();
         String tokens[] = shape.split(" ");
         String command = null;
         Float lastY = 0f;
-        for (String s : tokens) {
-            if (s.matches("[A-Z]")) {
-                Log.d(TAG, "cap letter " + s);
-                command = s;
+        for (String token : tokens) {
+            Float floatX;
+            Float floatY;
+
+            if (token.matches("[A-Z]")) {
+                command = token;
             }
 
-            if (s.matches("[0-9.]+,[0-9.]+")) {
+            if (token.matches("[0-9.]+,[0-9.]+")) {
                 if (command != null && (command.equals("L") || command.equals("M"))) {
-                    String[] coordinate = s.split(",");
-                    String x = coordinate[0];
-                    Float doubleX = Float.parseFloat(x);
-                    String y = coordinate[1];
-
-                    Float doubleY = Float.parseFloat(y)-80f;
-                    lastY = doubleY;
-                    Log.d(TAG, "coordinates " + doubleX + " " + doubleY);
-                    list.add(new Point(doubleX, doubleY));
+                    String[] coordinate = token.split(",");
+                    floatX = Float.parseFloat(coordinate[0]);
+                    floatY = Float.parseFloat(coordinate[1]);
+                    pointStack.add(new Point(floatX, floatY));
+                    lastY = floatY;
                 }
-            } else if (s.matches("[0-9.]+")) {
+            } else if (token.matches("[0-9.]+")) {
                 if (command != null && command.equals("H")) {
-                    Float doubleX = Float.parseFloat(s);
-                    Log.d(TAG, "coordinates " + doubleX + " " + lastY);
-                    list.add(new Point(doubleX, lastY));
+                    floatX = Float.parseFloat(token);
+                    floatY = lastY;
+                    pointStack.add(new Point(floatX, floatY ));
                 }
+            }
+
+            if(!pointStack.isEmpty()) {
+                float currentX = pointStack.peek().x;
+                float currentY = pointStack.peek().y;
+
+                X_MIN_POINT = (X_MIN_POINT < currentX) ? X_MIN_POINT : currentX;
+                X_MAX_POINT = (X_MAX_POINT > currentX) ? X_MAX_POINT : currentX;
+                Y_MIN_POINT = (Y_MIN_POINT < currentY) ? Y_MIN_POINT : currentY;
+                Y_MAX_POINT = (Y_MAX_POINT > currentY) ? Y_MAX_POINT : currentY;
+
+                X_WIDTH = X_MAX_POINT - X_MIN_POINT;
+                Y_HEIGHT = Y_MAX_POINT - Y_MIN_POINT;
             }
         }
-        return list;
+
+        return pointStack;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         canvas.drawPath(drawHuman(canvas.getWidth(), canvas.getHeight()), paint);
     }
@@ -127,49 +145,50 @@ public class HumanView extends View {
         }
     }
 
-    private Path drawHuman(int width, int height) {
-        Log.d(TAG, "Canvas h:" + height + " w:" + width);
-        Log.d(TAG, "Measured h:" + this.getMeasuredHeight() + " w:" + this.getMeasuredWidth());
+    private Path drawHuman(int canvasWidth, int canvasHeight) {
+        Log.d(TAG, "Canvas h:" + canvasHeight + " w:" + canvasWidth);
 
         Path newpath = new Path();
         if(!newpath.isEmpty()) {
             newpath.rewind();
         }
 
-        float imageWidthX = maxXPoint - minXPoint;
-        float imageHeightY = maxYPoint - minYPoint;
+        float centerOffsetX = - X_MIN_POINT - X_WIDTH/2;
+        float centerOffsetY = - Y_MIN_POINT - Y_HEIGHT/2;
 
-        float offsetX = width/2- minXPoint -(imageWidthX);
-        float offsetY = -minYPoint +height/2-imageHeightY/2;
+        for (int index=0;index<pointList.size();index++) {
+            Point p = pointList.get(index);
 
-        for (int i=0;i<list.size();i++) {
-            Point p = list.get(i);
-            Float x = (p.x + offsetX);
-            Float y = (p.y + offsetY) * scaleFactor(heightVector);
+            Float x = p.x + centerOffsetX;
+            Float y = (p.y + centerOffsetY) * scaleFactor(heightVector);
 
             if (newpath.isEmpty()) {
+                x = x + canvasWidth/2;
+                y = y + canvasHeight/2;
                 newpath.moveTo(x, y);
             } else {
-                if(i>= LEFT_CHEST_INDEX && i <= LEFT_CHEST_UPPER) {
+                if(index>= LEFT_CHEST_INDEX && index <= LEFT_CHEST_UPPER) {
                     x = x - computeChestDelta(chestVectorWidth);
-                } else if(i>= RIGHT_CHEST_INDEX && i <= RIGHT_CHEST_UPPER) {
+                } else if(index>= RIGHT_CHEST_INDEX && index <= RIGHT_CHEST_UPPER) {
                     x = x + computeChestDelta(chestVectorWidth);
                 }
 
                 //waist
-                if(i == LEFT_WAIST_INDEX) {
+                if(index == LEFT_WAIST_INDEX) {
                     x = x - computeWaistDelta(waistVectorWidth);
-                } else if(i == RIGHT_WAIST_INDEX) {
+                } else if(index == RIGHT_WAIST_INDEX) {
                     x = x + computeWaistDelta(waistVectorWidth);
                 }
 
                 //hip
-                if(i>= LEFT_HIP_INDEX && i <= LEFT_HIP_INDEX +1) {
+                if(index>= LEFT_HIP_INDEX && index <= LEFT_HIP_INDEX +1) {
                     x = x - computeHipDelta(hipVectorWidth);
-                } else if(i>= RIGHT_HIP_INDEX && i <= RIGHT_HIP_INDEX +1) {
+                } else if(index>= RIGHT_HIP_INDEX && index <= RIGHT_HIP_INDEX +1) {
                     x = x + computeHipDelta(hipVectorWidth);
                 }
 
+                x = x + canvasWidth/2;
+                y = y + canvasHeight/2;
                 newpath.lineTo(x, y);
             }
         }
@@ -179,21 +198,20 @@ public class HumanView extends View {
     }
 
     private float scaleFactor(int heightVector) {
-        Log.d(TAG, "height " + Float.valueOf(heightVector/783f));
-        return Float.valueOf(heightVector/783f);
+        Log.d(TAG, "height " + Float.valueOf(heightVector/Y_HEIGHT));
+        return heightVector/Y_HEIGHT;
     }
 
     private Float computeChestDelta(int chestWidth) {
-        return Float.valueOf(chestWidth/2)-70;
+        return (chestWidth/2)-CHEST_WIDTH/2;
     }
 
     private Float computeHipDelta(int hipSize) {
-        return Float.valueOf(hipSize/2)-68;
+        return (hipSize/2)-HIP_WIDTH/2;
     }
 
     private Float computeWaistDelta(int waistSize) {
-        Float f = Float.valueOf(waistSize/2)-64;
-        return f;
+        return (waistSize/2)-WAIST_WIDTH/2;
     }
 
     public  void waistWidthCM(int value) {
