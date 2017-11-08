@@ -38,7 +38,10 @@ export default class App extends React.Component {
           waistWidth= {this.state.waist}
           hipWidth= {this.state.hip}
           fullHeight= {this.state.height}
-          style= {{flex: 7, backgroundColor: 'skyblue'}} />
+          style= {{flex: 6, backgroundColor: 'skyblue'}} />
+        <Text style= {{flex: 1, backgroundColor: 'red'}}>
+          Best Fit
+        </Text>
         <View style={styles.slider_controller_container} >
           <Image
             source={require('./my-icon.png')}
@@ -102,30 +105,30 @@ export default class App extends React.Component {
 
 const chest = {
   min: 30,
-  max: 80,
+  max: 60,
   step: 1,
-  default: 50
-}
-
-const hip = {
-  min: 30,
-  max: 80,
-  step: 1,
-  default: 50
+  default: 48
 }
 
 const waist = {
   min: 30,
-  max: 80,
+  max: 60,
   step: 1,
-  default: 50
+  default: 44
+}
+
+const hip = {
+  min: 30,
+  max: 64,
+  step: 1,
+  default: 52
 }
 
 const height = {
   min: 120, //4 feet
-  max: 350, //11 ft
+  max: 200, //11 ft
   step: 1,
-  default: 279 //9feet
+  default: 176 //9feet
 }
 
 const styles = StyleSheet.create({

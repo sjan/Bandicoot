@@ -14,39 +14,38 @@ import java.util.Stack;
 
 public class HumanView extends View {
     private static final String HUMAN_SHAPE =
-        "M 302.94495,560.90551 298.44495,600.40551 292.44495,607.30551 "
-            + "281.94495,717.90551 272.54495,878.50551 275.74495,943.10551 H 230.34495 "
-            + "L 248.34495,888.30551 241.54495,734.30551 233.34495,607.50551 221.94495,599.90551 "
-            + "234.74495,489.70551 240.54495,483.40551 241.54495,417.80551 236.34495,355.80551 "
-            + "211.54495,413.70551 189.74495,522.20551 197.84495,572.30551 186.34495,585.80551 "
-            + "169.94495,582.60551 161.14495,493.60551 203.04495,294.80551 234.54495,256.60551 "
-            + "276.04495,235.70551 279.74495,214.70551 254.14495,195.40551 252.74495,108.40551 "
-            + "293.44495,80.305508 H 317.94495 L 358.64495,108.60551 357.24495,195.60551 "
-            + "331.64495,214.90551 335.34495,235.90551 376.84495,256.80551 408.34495,295.00551 "
-            + "450.24495,493.80551 441.44495,582.80551 425.04495,586.00551 413.54495,572.50551 "
-            + "421.64495,522.40551 399.84495,413.90551 375.04495,356.00551 369.84495,418.00551 "
-            + "370.84495,483.60551 376.64495,489.90551 389.44495,600.10551 378.04495,607.70551 "
-            + "369.84495,734.50551 363.04495,888.50551 381.04495,943.30551 H 335.64495 "
-            + "L 338.84495,878.70551 329.44495,718.10551 318.94495,607.50551 312.94495,600.60551 "
-            + "308.44495,561.10551 Z";
-    private static final int RIGHT_WAIST_INDEX = 42;
-    private static final int RIGHT_HIP_INDEX = 43;
-    private static final int RIGHT_CHEST_INDEX = 33;
-    private static final int RIGHT_CHEST_UPPER = 41;
+        "M 330.5,423.3439 325.1,462.8439 317.9,469.7439 305.3,600.3439 294.1,760.9439 "
+            + "297.9,825.5439 H 243.6 L 265.1,770.7439 250.3,656.7439 247.1,469.9439 "
+            + "233.5,454.9439 248.8,359.5439 255.7,345.8439 262.7,270.2439 250.7,214.2439 "
+            + "221,296.1439 195,394.6439 204.7,444.7439 190.9,458.2439 171.3,455.0439 "
+            + "160.8,366.0439 210.9,142.2439 248.6,112.0439 305.7,96.143902 309.2,76.143902 "
+            + "290.3,56.843902 289.1,-9.1560976 319.1,-37.256098 H 348.4 L 378.4,-8.9560976 "
+            + "377.2,57.043902 358.3,76.343902 361.8,96.343902 418.9,112.2439 456.6,142.4439 "
+            + "506.8,366.2439 496.3,455.2439 476.7,458.4439 462.9,444.9439 472.6,394.8439 "
+            + "446.5,296.3439 416.8,214.4439 404.8,270.4439 411.8,346.0439 418.7,359.7439 "
+            + "434,455.1439 420.4,470.1439 417.2,656.9439 402.4,770.9439 423.9,825.7439 "
+            + "H 369.6 L 373.4,761.1439 362.2,600.5439 349.6,469.9439 342.4,463.0439 "
+            + "337,423.5439 Z";
 
-    private static final int LEFT_WAIST_INDEX = 13;
+    private static final int RIGHT_HIP_INDEX = 43;
+    private static final int RIGHT_WAIST_INDEX = 42;
+    private static final int RIGHT_CHEST_UPPER = 41;
+    private static final int RIGHT_CHEST_INDEX = 33;
+
     private static final int LEFT_HIP_INDEX = 11;
+    private static final int LEFT_WAIST_INDEX = 13;
     private static final int LEFT_CHEST_INDEX = 14;
     private static final int LEFT_CHEST_UPPER = 22;
 
-    private static final Float CHEST_WIDTH = 140f;
-    private static final Float HIP_WIDTH = 136f;
-    private static final Float WAIST_WIDTH = 128f;
+    private static final Float CM_HEIGHT = 176f;
 
     Float X_MIN_POINT = Float.MAX_VALUE;
     Float X_MAX_POINT = Float.MIN_VALUE;
     Float Y_MIN_POINT = Float.MAX_VALUE;
     Float Y_MAX_POINT = Float.MIN_VALUE;
+    Float HIP_WIDTH;
+    Float WAIST_WIDTH;
+    Float CHEST_WIDTH;
     Float X_WIDTH;
     Float Y_HEIGHT;
 
@@ -60,7 +59,7 @@ public class HumanView extends View {
     private int chestVectorWidth;
     private Paint paint = new Paint();
 
-    private final float CONVERSION_FACTOR = 2.8f;
+    private float CONVERSION_FACTOR = 0f;
 
     public HumanView(Context context) {
         this(context, null);
@@ -95,7 +94,7 @@ public class HumanView extends View {
                 command = token;
             }
 
-            if (token.matches("[0-9.]+,[0-9.]+")) {
+            if (token.matches("-?[0-9.]+,-?[0-9.]+")) {
                 if (command != null && (command.equals("L") || command.equals("M"))) {
                     String[] coordinate = token.split(",");
                     floatX = Float.parseFloat(coordinate[0]);
@@ -103,7 +102,7 @@ public class HumanView extends View {
                     pointStack.add(new Point(floatX, floatY));
                     lastY = floatY;
                 }
-            } else if (token.matches("[0-9.]+")) {
+            } else if (token.matches("-?[0-9.]+")) {
                 if (command != null && command.equals("H")) {
                     floatX = Float.parseFloat(token);
                     floatY = lastY;
@@ -124,6 +123,12 @@ public class HumanView extends View {
                 Y_HEIGHT = Y_MAX_POINT - Y_MIN_POINT;
             }
         }
+
+        CONVERSION_FACTOR = Y_HEIGHT/CM_HEIGHT;
+        CHEST_WIDTH = (pointStack.get(RIGHT_CHEST_INDEX).x - pointStack.get(LEFT_CHEST_INDEX).x);
+        WAIST_WIDTH = (pointStack.get(RIGHT_WAIST_INDEX).x - pointStack.get(LEFT_WAIST_INDEX)
+            .x);
+        HIP_WIDTH = (pointStack.get(RIGHT_HIP_INDEX).x - pointStack.get(LEFT_HIP_INDEX).x);
 
         return pointStack;
     }
@@ -198,20 +203,19 @@ public class HumanView extends View {
     }
 
     private float scaleFactor(int heightVector) {
-        Log.d(TAG, "height " + Float.valueOf(heightVector/Y_HEIGHT));
         return heightVector/Y_HEIGHT;
     }
 
-    private Float computeChestDelta(int chestWidth) {
-        return (chestWidth/2)-CHEST_WIDTH/2;
+    private Float computeChestDelta(int chestVectorWidth) {
+        return (chestVectorWidth/2)-CHEST_WIDTH/2;
     }
 
     private Float computeHipDelta(int hipSize) {
         return (hipSize/2)-HIP_WIDTH/2;
     }
 
-    private Float computeWaistDelta(int waistSize) {
-        return (waistSize/2)-WAIST_WIDTH/2;
+    private Float computeWaistDelta(int waistWidth) {
+        return (waistWidth/2)-WAIST_WIDTH/2;
     }
 
     public  void waistWidthCM(int value) {
@@ -230,7 +234,6 @@ public class HumanView extends View {
     }
 
     private int computeVectorDistance(int centimeterValue) {
-        Log.d(TAG, centimeterValue + " converted into " + centimeterValue*CONVERSION_FACTOR);
         return Math.round(centimeterValue*CONVERSION_FACTOR);
     }
 
