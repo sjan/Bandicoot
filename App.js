@@ -2,7 +2,11 @@ import React from 'react';
 import { FlatList, StyleSheet, Text, View, Slider, Image } from 'react-native';
 import HumanImageView from './HumanView';
 
-let allstarSizeData = require('./allstar_2017.json');
+let allstarSizeData = require('./resources/allstar_2017.json');
+let uhlmannSizeData = require('./resources/uhlmann_2017.json');
+let pbtSizeData = require('./resources/pbt_2017.json');
+let negriniSizeData = require('./resources/negrini_2017.json');
+
 
 export default class App extends React.Component {
   constructor(props) {
@@ -13,30 +17,125 @@ export default class App extends React.Component {
       waist: waist.default,
       hip: hip.default,
       height: height.default,
+      bestFitBrand: 'ALLSTAR',
+      bestFitSize: '50',
+      bestFit: ['ALLSTAR', 0, 0]
     };
   }
 
   findSize() {
-    var mensSizeArray = allstarSizeData.MEN.sizes;
-    for(var i in mensSizeArray) {
+    var resultArray = [];
+    var allstarMensSizeArray = allstarSizeData.MEN.sizes;
+    var uhlmannMensSizeArray = uhlmannSizeData.MEN.sizes;
+    var pbtMensSizeArray = pbtSizeData.MEN.sizes;
+    var negriniMensSizeArray = negriniSizeData.MEN.sizes;
 
-       var sizeObject = mensSizeArray[i];
-       chestRange = sizeObject.chest;
-       heightRange = sizeObject.height;
-       waistRange = sizeObject.waist;
-       hipRange = sizeObject.hip;
+    for(var i in allstarMensSizeArray) {
+      var sizeObject = allstarMensSizeArray[i];
 
-      if(this.inRange(chestRange, this.state.chest) &&
-          this.inRange(heightRange, this.state.height) &&
-          this.inRange(waistRange, this.state.waist) &&
-          this.inRange(hipRange, this.state.hip)) {
-        console.log("measurement " +
-        this.state.chest + " " +
-        this.state.height + " " +
-        this.state.waist + " " +
-        this.state.hip);
-        console.log("matching size " + mensSizeArray[i].size);
+      chestRange = sizeObject.chest;
+      heightRange = sizeObject.height;
+      waistRange = sizeObject.waist;
+      hipRange = sizeObject.hip;
+
+      chestFit = this.fit(chestRange, this.state.chest);
+      heightFit = this.fit(heightRange, this.state.height);
+      waistFit = this.fit(waistRange, this.state.waist);
+      hipFit = this.fit(hipRange, this.state.hip);
+
+      fitDelta = chestFit + heightFit + waistFit + hipFit;
+
+      if(chestFit >= 0 &&
+          heightFit >= 0 &&
+          waistFit >= 0 &&
+          hipFit >= 0) {
+            resultArray.push([fitDelta, 'ALLSTAR', allstarMensSizeArray[i].size]);
       }
+    }
+
+    for(var i in uhlmannMensSizeArray) {
+      var sizeObject = uhlmannMensSizeArray[i];
+
+      chestRange = sizeObject.chest;
+      heightRange = sizeObject.height;
+      waistRange = sizeObject.waist;
+      hipRange = sizeObject.hip;
+
+      chestFit = this.fit(chestRange, this.state.chest);
+      heightFit = this.fit(heightRange, this.state.height);
+      waistFit = this.fit(waistRange, this.state.waist);
+      hipFit = this.fit(hipRange, this.state.hip);
+
+      fitDelta = chestFit + heightFit + waistFit + hipFit;
+
+      if(chestFit >= 0 &&
+          heightFit >= 0 &&
+          waistFit >= 0 &&
+          hipFit >= 0) {
+            resultArray.push([fitDelta, 'UHLMANN', uhlmannMensSizeArray[i].size]);
+      }
+    }
+
+    for(var i in pbtMensSizeArray) {
+      var sizeObject = pbtMensSizeArray[i];
+
+      chestRange = sizeObject.chest;
+      heightRange = sizeObject.height;
+      waistRange = sizeObject.waist;
+      hipRange = sizeObject.hip;
+
+      chestFit = this.fit(chestRange, this.state.chest);
+      heightFit = this.fit(heightRange, this.state.height);
+      waistFit = this.fit(waistRange, this.state.waist);
+      hipFit = this.fit(hipRange, this.state.hip);
+
+      fitDelta = chestFit + heightFit + waistFit + hipFit;
+
+      if(chestFit >= 0 &&
+          heightFit >= 0 &&
+          waistFit >= 0 &&
+          hipFit >= 0) {
+            resultArray.push([fitDelta, 'PBT', pbtMensSizeArray[i].size]);
+      }
+    }
+
+    for(var i in negriniMensSizeArray) {
+      var sizeObject = negriniMensSizeArray[i];
+
+      chestRange = sizeObject.chest;
+      heightRange = sizeObject.height;
+      waistRange = sizeObject.waist;
+      hipRange = sizeObject.hip;
+
+      chestFit = this.fit(chestRange, this.state.chest);
+      heightFit = this.fit(heightRange, this.state.height);
+      waistFit = this.fit(waistRange, this.state.waist);
+      hipFit = this.fit(hipRange, this.state.hip);
+
+      fitDelta = chestFit + heightFit + waistFit + hipFit;
+
+      if(chestFit >= 0 &&
+          heightFit >= 0 &&
+          waistFit >= 0 &&
+          hipFit >= 0) {
+            resultArray.push([fitDelta, 'NEGRINI', negriniMensSizeArray[i].size]);
+      }
+    }
+
+    resultArray.sort(function(a, b) {
+      return a[0] - b[0];
+    });
+
+    if(resultArray.length>0) {
+      this.state.bestFit = [resultArray[0][0], resultArray[0][1], resultArray[0][2]];
+      this.state.bestFitDelta = this.state.bestFit[0];
+      this.state.bestFitBrand = this.state.bestFit[1];
+      this.state.bestFitSize = this.state.bestFit[2];
+
+    } else {
+      this.state.bestFitSize = '';
+      this.state.bestFitDelta = '';
+      this.state.bestFitBrand = 'No Match';
     }
   }
 
@@ -48,29 +147,60 @@ export default class App extends React.Component {
       }
   }
 
+  fit(range, size) {
+      if(size >= range.lower &&
+         size <= range.upper) {
+        return 0;
+      } else if(size < range.lower) {
+        return (range.lower - size);
+      } else if(size > range.upper) {
+        return (range.upper - size);
+      }
+  }
+
   slidingChest(itemSelected) {
+    console.log("sliding chest");
+    this.setState({chest: itemSelected});
+  }
+
+  slidingChestComplete(itemSelected) {
+    console.log("sliding chest complete");
     this.setState({chest: itemSelected});
     this.findSize();
   }
 
   slidingWaist(itemSelected) {
+    console.log("sliding waist complete");
+    this.setState({waist: itemSelected})
+    }
+
+  slidingWaistComplete(itemSelected) {
+    console.log("sliding waist complete");
     this.setState({waist: itemSelected})
     this.findSize();
   }
 
   slidingHip(itemSelected) {
+    console.log("sliding hip complete");
+    this.setState({hip: itemSelected})
+  }
+
+  slidingHipComplete(itemSelected) {
+    console.log("sliding hip complete");
     this.setState({hip: itemSelected})
     this.findSize();
   }
 
   slidingHeight(itemSelected) {
     this.setState({height: itemSelected})
+  }
+
+  slidingHeightComplete(itemSelected) {
+    this.setState({height: itemSelected})
     this.findSize();
   }
 
   render() {
-
-
     return (
       <View style= {{flex: 1, flexDirection: 'column'}}>
         <HumanImageView
@@ -81,7 +211,7 @@ export default class App extends React.Component {
           style= {{flex: 6, backgroundColor: 'skyblue'}} />
         <View style = {styles.size_label_container} >
             <Text style = {styles.size_label_text} >
-              Brand and Size
+              {this.state.bestFitBrand} {this.state.bestFitSize}
             </Text>
         </View>
         <View style={styles.slider_controller_container} >
@@ -95,7 +225,7 @@ export default class App extends React.Component {
               minimumValue = {chest.min}
               step = {chest.step}
               value = {chest.default}
-              onSlidingComplete = {(val) => {console.log("chest slide completed")}}
+              onSlidingComplete = {(val) => {this.slidingChestComplete(val)}}
               onValueChange = {(val) => {this.slidingChest(val)}}/>
           </View>
         </View>
@@ -110,6 +240,7 @@ export default class App extends React.Component {
               minimumValue = {waist.min}
               value = {waist.default}
               step = {waist.step}
+              onSlidingComplete = {(val) => {this.slidingWaistComplete(val)}}
               onValueChange = {(val) => {this.slidingWaist(val)}}/>
           </View>
         </View>
@@ -124,6 +255,7 @@ export default class App extends React.Component {
               minimumValue = {hip.min}
               value = {hip.default}
               step = {hip.step}
+              onSlidingComplete = {(val) => {this.slidingHipComplete(val)}}
               onValueChange = {(val) => {this.slidingHip(val)}}/>
           </View>
         </View>
@@ -138,6 +270,7 @@ export default class App extends React.Component {
               minimumValue = {height.min}
               value = {height.default}
               step = {height.step}
+              onSlidingComplete = {(val) => {this.slidingHeightComplete(val)}}
               onValueChange = {(val) => {this.slidingHeight(val)}}/>
           </View>
         </View>
@@ -147,22 +280,22 @@ export default class App extends React.Component {
 }
 
 const chest = {
-  min: 60,
-  max: 120,
+  min: 62,
+  max: 125,
   step: 1,
   default: 96
 }
 
 const waist = {
   min: 55,
-  max: 120,
+  max: 110,
   step: 1,
   default: 88
 }
 
 const hip = {
-  min: 60,
-  max: 130,
+  min: 65,
+  max: 127,
   step: 1,
   default: 104
 }

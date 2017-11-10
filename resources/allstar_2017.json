@@ -678,25 +678,6 @@
         }
       },
       {
-        "size": "52",
-        "height": {
-          "lower": "176",
-          "upper": "182"
-        },
-        "chest": {
-          "lower": "100",
-          "upper": "104"
-        },
-        "waist": {
-          "lower": "88",
-          "upper": "92"
-        },
-        "hip": {
-          "lower": "104",
-          "upper": "108"
-        }
-      },
-      {
         "size": "54",
         "height": {
           "lower": "176",
@@ -941,7 +922,7 @@
           "upper": "124"
         }
       },
-      { "size": "93",
+      { "size": "23",
         "height": {
           "lower": "158",
           "upper": "164"
@@ -951,8 +932,8 @@
           "upper": "92"
         },
         "waist": {
-          "lower": "76",
-          "upper": "80"
+          "lower": "80",
+          "upper": "84"
         },
         "hip": {
           "lower": "92",
@@ -993,8 +974,8 @@
           "upper": "92"
         },
         "hip": {
-          "lower": "104",
-          "upper": "108"
+          "lower": "100",
+          "upper": "104"
         }
       },
       {
@@ -1008,8 +989,8 @@
           "upper": "104"
         },
         "waist": {
-          "lower": "88",
-          "upper": "92"
+          "lower": "92",
+          "upper": "96"
         },
         "hip": {
           "lower": "104",
@@ -1027,8 +1008,8 @@
           "upper": "108"
         },
         "waist": {
-          "lower": "92",
-          "upper": "96"
+          "lower": "96",
+          "upper": "100"
         },
         "hip": {
           "lower": "108",
@@ -1046,8 +1027,8 @@
           "upper": "112"
         },
         "waist": {
-          "lower": "96",
-          "upper": "100"
+          "lower": "100",
+          "upper": "104"
         },
         "hip": {
           "lower": "112",
@@ -1065,8 +1046,8 @@
           "upper": "116"
         },
         "waist": {
-          "lower": "100",
-          "upper": "104"
+          "lower": "104",
+          "upper": "108"
         },
         "hip": {
           "lower": "116",

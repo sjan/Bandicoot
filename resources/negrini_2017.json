@@ -1,0 +1,327 @@
+{
+  "WOMEN": {
+    "sizes": [
+      { "size": "40",
+        "height": {
+          "lower": "150",
+          "upper": "158"
+        },
+        "chest": {
+          "lower": "94",
+          "upper": "94"
+        },
+        "waist": {
+          "lower": "70",
+          "upper": "70"
+        },
+        "hip": {
+          "lower": "90",
+          "upper": "90"
+        }
+      },
+      { "size": "42",
+        "height": {
+          "lower": "158",
+          "upper": "164"
+        },
+        "chest": {
+          "lower": "96",
+          "upper": "96"
+        },
+        "waist": {
+          "lower": "72",
+          "upper": "72"
+        },
+        "hip": {
+          "lower": "94",
+          "upper": "94"
+        }
+      },
+      {
+        "size": "44",
+        "height": {
+          "lower": "160",
+          "upper": "166"
+        },
+        "chest": {
+          "lower": "98",
+          "upper": "98"
+        },
+        "waist": {
+          "lower": "76",
+          "upper": "76"
+        },
+        "hip": {
+          "lower": "98",
+          "upper": "98"
+        }
+      },
+      {
+        "size": "46",
+        "height": {
+          "lower": "162",
+          "upper": "168"
+        },
+        "chest": {
+          "lower": "104",
+          "upper": "104"
+        },
+        "waist": {
+          "lower": "80",
+          "upper": "80"
+        },
+        "hip": {
+          "lower": "102",
+          "upper": "102"
+        }
+      },
+      {
+        "size": "48",
+        "height": {
+          "lower": "165",
+          "upper": "170"
+        },
+        "chest": {
+          "lower": "108",
+          "upper": "108"
+        },
+        "waist": {
+          "lower": "84",
+          "upper": "84"
+        },
+        "hip": {
+          "lower": "104",
+          "upper": "104"
+        }
+      },
+      {
+        "size": "50",
+        "height": {
+          "lower": "168",
+          "upper": "175"
+        },
+        "chest": {
+          "lower": "110",
+          "upper": "110"
+        },
+        "waist": {
+          "lower": "90",
+          "upper": "90"
+        },
+        "hip": {
+          "lower": "110",
+          "upper": "110"
+        }
+      }
+    ]
+  },
+  "MEN": {
+    "sizes": [
+      { "size": "38",
+        "height": {
+          "lower": "135",
+          "upper": "142"
+        },
+        "chest": {
+          "lower": "88",
+          "upper": "88"
+        },
+        "waist": {
+          "lower": "68",
+          "upper": "68"
+        },
+        "hip": {
+          "lower": "84",
+          "upper": "84"
+        }
+      },
+      { "size": "40",
+        "height": {
+          "lower": "142",
+          "upper": "152"
+        },
+        "chest": {
+          "lower": "90",
+          "upper": "90"
+        },
+        "waist": {
+          "lower": "70",
+          "upper": "70"
+        },
+        "hip": {
+          "lower": "88",
+          "upper": "88"
+        }
+      },
+      { "size": "42",
+        "height": {
+          "lower": "152",
+          "upper": "159"
+        },
+        "chest": {
+          "lower": "92",
+          "upper": "92"
+        },
+        "waist": {
+          "lower": "72",
+          "upper": "72"
+        },
+        "hip": {
+          "lower": "92",
+          "upper": "92"
+        }
+      },
+      {
+        "size": "44",
+        "height": {
+          "lower": "160",
+          "upper": "163"
+        },
+        "chest": {
+          "lower": "96",
+          "upper": "96"
+        },
+        "waist": {
+          "lower": "76",
+          "upper": "76"
+        },
+        "hip": {
+          "lower": "94",
+          "upper": "94"
+        }
+      },
+      {
+        "size": "46",
+        "height": {
+          "lower": "164",
+          "upper": "170"
+        },
+        "chest": {
+          "lower": "98",
+          "upper": "98"
+        },
+        "waist": {
+          "lower": "80",
+          "upper": "80"
+        },
+        "hip": {
+          "lower": "100",
+          "upper": "100"
+        }
+      },
+      {
+        "size": "48",
+        "height": {
+          "lower": "170",
+          "upper": "176"
+        },
+        "chest": {
+          "lower": "104",
+          "upper": "104"
+        },
+        "waist": {
+          "lower": "86",
+          "upper": "86"
+        },
+        "hip": {
+          "lower": "104",
+          "upper": "104"
+        }
+      },
+      {
+        "size": "50",
+        "height": {
+          "lower": "172",
+          "upper": "178"
+        },
+        "chest": {
+          "lower": "106",
+          "upper": "106"
+        },
+        "waist": {
+          "lower": "92",
+          "upper": "92"
+        },
+        "hip": {
+          "lower": "108",
+          "upper": "108"
+        }
+      },
+      {
+        "size": "52",
+        "height": {
+          "lower": "176",
+          "upper": "182"
+        },
+        "chest": {
+          "lower": "110",
+          "upper": "110"
+        },
+        "waist": {
+          "lower": "96",
+          "upper": "96"
+        },
+        "hip": {
+          "lower": "110",
+          "upper": "110"
+        }
+      },
+      {
+        "size": "54",
+        "height": {
+          "lower": "182",
+          "upper": "186"
+        },
+        "chest": {
+          "lower": "116",
+          "upper": "116"
+        },
+        "waist": {
+          "lower": "100",
+          "upper": "100"
+        },
+        "hip": {
+          "lower": "114",
+          "upper": "114"
+        }
+      },
+      {
+        "size": "56",
+        "height": {
+          "lower": "186",
+          "upper": "190"
+        },
+        "chest": {
+          "lower": "120",
+          "upper": "120"
+        },
+        "waist": {
+          "lower": "102",
+          "upper": "102"
+        },
+        "hip": {
+          "lower": "116",
+          "upper": "116"
+        }
+      },
+      { "size": "58",
+        "height": {
+          "lower": "188",
+          "upper": "192"
+        },
+        "chest": {
+          "lower": "126",
+          "upper": "126"
+        },
+        "waist": {
+          "lower": "104",
+          "upper": "104"
+        },
+        "hip": {
+          "lower": "124",
+          "upper": "124"
+        }
+      }
+    ]
+  }
+}
