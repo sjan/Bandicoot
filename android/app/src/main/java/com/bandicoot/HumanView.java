@@ -12,6 +12,7 @@ import android.view.View;
 import java.util.List;
 import java.util.Stack;
 
+
 public class HumanView extends View {
     private static final String HUMAN_SHAPE =
         "M 330.5,423.3439 325.1,462.8439 317.9,469.7439 305.3,600.3439 294.1,760.9439 "
@@ -218,6 +219,10 @@ public class HumanView extends View {
         return (waistWidth/2)-WAIST_WIDTH/2;
     }
 
+    private int computeVectorDistance(int centimeterValue) {
+        return Math.round(centimeterValue*CONVERSION_FACTOR);
+    }
+
     public  void waistWidthCM(int value) {
         this.waistVectorWidth = computeVectorDistance(value);
         this.invalidate();
@@ -228,13 +233,24 @@ public class HumanView extends View {
         this.invalidate();
     }
 
-    public void chestWidthCM(int cmValue) {
-        this.chestVectorWidth = computeVectorDistance(cmValue);
+    public void chestCM(int cmValue) {
+        this.chestVectorWidth = computeVectorDistance(cmValue/3);
         this.invalidate();
     }
 
-    private int computeVectorDistance(int centimeterValue) {
-        return Math.round(centimeterValue*CONVERSION_FACTOR);
+    public  void waistCM(int cmValue) {
+        this.waistVectorWidth = computeVectorDistance(cmValue/3);
+        this.invalidate();
+    }
+
+    public void hipCM(int cmValue) {
+        this.hipVectorWidth = computeVectorDistance(cmValue/3);
+        this.invalidate();
+    }
+
+    public void chestWidthCM(int cmValue) {
+        this.chestVectorWidth = computeVectorDistance(cmValue);
+        this.invalidate();
     }
 
     public void heightCM(int centimeterValue) {

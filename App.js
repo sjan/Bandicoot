@@ -2,46 +2,88 @@ import React from 'react';
 import { FlatList, StyleSheet, Text, View, Slider, Image } from 'react-native';
 import HumanImageView from './HumanView';
 
+let allstarSizeData = require('./allstar_2017.json');
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+
+  this.state = {
       chest: chest.default,
       waist: waist.default,
       hip: hip.default,
-      height: height.default
+      height: height.default,
     };
+  }
+
+  findSize() {
+    var mensSizeArray = allstarSizeData.MEN.sizes;
+    for(var i in mensSizeArray) {
+
+       var sizeObject = mensSizeArray[i];
+       chestRange = sizeObject.chest;
+       heightRange = sizeObject.height;
+       waistRange = sizeObject.waist;
+       hipRange = sizeObject.hip;
+
+      if(this.inRange(chestRange, this.state.chest) &&
+          this.inRange(heightRange, this.state.height) &&
+          this.inRange(waistRange, this.state.waist) &&
+          this.inRange(hipRange, this.state.hip)) {
+        console.log("measurement " +
+        this.state.chest + " " +
+        this.state.height + " " +
+        this.state.waist + " " +
+        this.state.hip);
+        console.log("matching size " + mensSizeArray[i].size);
+      }
+    }
+  }
+
+  inRange(range, size) {
+      if(size >= range.lower && size <= range.upper) {
+        return true;
+      } else {
+        return false;
+      }
   }
 
   slidingChest(itemSelected) {
     this.setState({chest: itemSelected});
+    this.findSize();
   }
 
   slidingWaist(itemSelected) {
     this.setState({waist: itemSelected})
+    this.findSize();
   }
 
   slidingHip(itemSelected) {
     this.setState({hip: itemSelected})
+    this.findSize();
   }
 
   slidingHeight(itemSelected) {
     this.setState({height: itemSelected})
+    this.findSize();
   }
 
   render() {
 
+
     return (
       <View style= {{flex: 1, flexDirection: 'column'}}>
         <HumanImageView
-          chestWidth= {this.state.chest}
-          waistWidth= {this.state.waist}
-          hipWidth= {this.state.hip}
+          chestSize= {this.state.chest}
+          waistSize= {this.state.waist}
+          hipSize= {this.state.hip}
           fullHeight= {this.state.height}
           style= {{flex: 6, backgroundColor: 'skyblue'}} />
-        <Text style= {{flex: 1, backgroundColor: 'red'}}>
-          Best Fit
-        </Text>
+        <View style = {styles.size_label_container} >
+            <Text style = {styles.size_label_text} >
+              Brand and Size
+            </Text>
+        </View>
         <View style={styles.slider_controller_container} >
           <Image
             source={require('./my-icon.png')}
@@ -53,6 +95,7 @@ export default class App extends React.Component {
               minimumValue = {chest.min}
               step = {chest.step}
               value = {chest.default}
+              onSlidingComplete = {(val) => {console.log("chest slide completed")}}
               onValueChange = {(val) => {this.slidingChest(val)}}/>
           </View>
         </View>
@@ -104,24 +147,24 @@ export default class App extends React.Component {
 }
 
 const chest = {
-  min: 30,
-  max: 60,
+  min: 60,
+  max: 120,
   step: 1,
-  default: 48
+  default: 96
 }
 
 const waist = {
-  min: 30,
-  max: 60,
+  min: 55,
+  max: 120,
   step: 1,
-  default: 44
+  default: 88
 }
 
 const hip = {
-  min: 30,
-  max: 64,
+  min: 60,
+  max: 130,
   step: 1,
-  default: 52
+  default: 104
 }
 
 const height = {
@@ -154,5 +197,16 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     marginLeft: 5
+  },
+  size_label_container: {
+    height: 80,
+    backgroundColor: 'lightyellow',
+    alignItems:'center',
+    justifyContent: 'center'
+  },
+  size_label_text: {
+    height: 30,
+    alignItems:'center',
+    justifyContent: 'center'
   }
 });

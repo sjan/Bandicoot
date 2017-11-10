@@ -24,19 +24,31 @@ public class HumanShapeViewManager extends SimpleViewManager<HumanView> {
         return new HumanView(reactContext.getBaseContext());
     }
 
-    @ReactProp(name = "chestWidth")
     public void setChestWidth(HumanView humanView, int width) {
         humanView.chestWidthCM(width);
     }
 
-    @ReactProp(name = "waistWidth")
     public void setWaistWidth(HumanView humanView, int width) {
         humanView.waistWidthCM(width);
     }
 
-    @ReactProp(name = "hipWidth")
     public void setHipWidth(HumanView humanView, int width) {
         humanView.hipWidthCM(width);
+    }
+
+    @ReactProp(name = "chestSize")
+    public void setChestSize(HumanView humanView, int width) {
+        humanView.chestCM(width);
+    }
+
+    @ReactProp(name = "waistSize")
+    public void setWaistSize(HumanView humanView, int width) {
+        humanView.waistCM(width);
+    }
+
+    @ReactProp(name = "hipSize")
+    public void setHipSize(HumanView humanView, int width) {
+        humanView.hipCM(width);
     }
 
     @ReactProp(name = "fullHeight")
