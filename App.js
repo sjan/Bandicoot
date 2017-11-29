@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   controller_container: {
     flexDirection: 'column',
-    flex: 4,
+    flex: 4
   }
 });
 
@@ -85,15 +85,17 @@ export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      chest:  CHEST_PARAMETERS.default,
-      waist:  WAIST_PARAMETERS.default,
-      hip:    HIP_PARAMETERS.default,
+      chest: CHEST_PARAMETERS.default,
+      waist: WAIST_PARAMETERS.default,
+      hip: HIP_PARAMETERS.default,
       height: HEIGHT_PARAMETERS.default,
 
       //TODO: initial state should carry over from previous sessions
       bestFitBrand: 'ALLSTAR',
       bestFitSize: '50',
-      bestFit: ['ALLSTAR', 0, 0],
+      bestFit: [
+        'ALLSTAR', 0, 0
+      ],
 
       labelPosition: new Animated.Value(0),
       labelElevation: new Animated.Value(0),
@@ -110,17 +112,14 @@ export default class App extends React.Component {
     this.state.bestFitDelta = '';
     this.state.bestFitBrand = 'Searching...';
 
-    Animated.spring(
-      this.state.labelHeight,
-      {
-        toValue: 0,
-        speed: 2,
-      }
-    ).start();
+    Animated.spring(this.state.labelHeight, {
+      toValue: 0,
+      speed: 2
+    }).start();
   }
 
   findSize() {
-    var pbtMensSizeArray     = sizeData['PBT'].MEN.sizes;
+    var pbtMensSizeArray = sizeData['PBT'].MEN.sizes;
     var allstarMensSizeArray = sizeData['ALLSTAR'].MEN.sizes;
     var uhlmannMensSizeArray = sizeData['UHLMANN'].MEN.sizes;
     var negriniMensSizeArray = sizeData['NEGRINI'].MEN.sizes;
@@ -146,17 +145,11 @@ export default class App extends React.Component {
 
           fitDelta = chestFit + heightFit + waistFit + hipFit;
 
-          if (chestFit == 0 &&
-            heightFit == 0 &&
-            waistFit == 0 &&
-            hipFit == 0) {
+          if (chestFit == 0 && heightFit == 0 && waistFit == 0 && hipFit == 0) {
             perfectFitResultArray.push([
               brand, allstarMensSizeArray[i].size
             ]);
-          } else if (chestFit >= 0 &&
-            heightFit >= 0 &&
-            waistFit >= 0 &&
-            hipFit >= 0) {
+          } else if (chestFit >= 0 && heightFit >= 0 && waistFit >= 0 && hipFit >= 0) {
             fitResultArray.push([
               fitDelta, brand, allstarMensSizeArray[i].size
             ]);
@@ -188,13 +181,10 @@ export default class App extends React.Component {
     this.state.bestFitSize = this.state.bestFit[1];
     this.state.bestFitDelta = this.state.bestFit[2];
 
-    Animated.spring(
-      this.state.labelHeight,
-      {
-        toValue: 60,
-        tension: 50,
-      }
-    ).start();
+    Animated.spring(this.state.labelHeight, {
+      toValue: 60,
+      tension: 50
+    }).start();
   }
 
   inRange(range, size) {
@@ -256,142 +246,97 @@ export default class App extends React.Component {
   }
 
   render() {
-    let { labelPosition } = this.state;
-    let { labelElevation } = this.state;
-    let { labelHeight } = this.state;
-    let { flexInfo } = this.state;
-    let { labelOpacity } = this.state;
+    let {labelPosition} = this.state;
+    let {labelElevation} = this.state;
+    let {labelHeight} = this.state;
+    let {flexInfo} = this.state;
+    let {labelOpacity} = this.state;
 
-    return (
-      <View
-        nativeID={"root-container"}
-        style={{
-          flex: 1,
-          flexDirection: 'column'
-        }}>
-        <View
-          nativeID={"display-container"}
-          style={{
+    return (<View nativeID={"root-container"} style={{
+        flex: 1,
+        flexDirection: 'column'
+      }}>
+      <View nativeID={"display-container"} style={{
           flex: 6
         }}>
-          <HumanImageView
-            chestSize={this.state.chest}
-            waistSize={this.state.waist}
-            hipSize={this.state.hip}
-            fullHeight={this.state.height}
-            style={{
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'skyblue',
-            }}
-          />
-          <Animated.View
-            style={[
+        <HumanImageView chestSize={this.state.chest} waistSize={this.state.waist} hipSize={this.state.hip} fullHeight={this.state.height} style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'skyblue'
+          }}/>
+        <Animated.View style={[
+            {
+              elevation: this.state.labelElevation,
+              height: this.state.labelHeight
+            },
+            styles.label_container
+          ]}>
+          <Text style={[
               {
-                elevation: this.state.labelElevation,
-                height: this.state.labelHeight
+                position: 'absolute',
+                left: 10,
+                top: 10,
+                textAlign: 'center'
               },
-              styles.label_container
+              styles.size_label_text
             ]}>
-            <Text
-              style={[
-                {
-                  position: 'absolute',
-                  left: 10,
-                  top: 10,
-                  textAlign:'center'
-                },
-                styles.size_label_text
-              ]}>
-              {this.state.bestFitBrand} {this.state.bestFitSize}
-            </Text>
-            <View
-              nativeID={"button-container"}
-              style={[
-                {
-                  position: 'absolute',
-                  width: 100,
-                  right: 10,
-                  top: 10
-                }
-              ]}>
-            <Button
-              onPress={(val) =>
-                {
-                  console.log("click");
-                  Animated.timing(
-                    this.state.labelElevation,
-                    {
-                      toValue: 8,
-                      duration: 1000,
-                    }
-                  ).start();
-                }
-                }
-              title="More"
-              color='blue'
-            />
-            </View>
-          </Animated.View>
+            {this.state.bestFitBrand}
+            {this.state.bestFitSize}
+          </Text>
+          <View nativeID={"button-container"} style={[{
+                position: 'absolute',
+                width: 100,
+                right: 10,
+                top: 10
+              }
+            ]}>
+            <Button onPress={(val) => {
+                console.log("click");
+                Animated.timing(this.state.labelElevation, {
+                  toValue: 8,
+                  duration: 1000
+                }).start();
+              }
+} title="More" color='blue'/>
+          </View>
+        </Animated.View>
       </View>
-        <View style={styles.controller_container}>
-          <View style={styles.slider_controller_container}>
-            <Image style={styles.slider_controller_icon}
-              source={require('./my-icon.png')} />
-            <View style=
-              {
-                styles.slider_controller_sub_container
-              }>
-              <Text>Chest: {this.state.chest}cm</Text>
-              <Slider
-                maximumValue={CHEST_PARAMETERS.max}
-                minimumValue={CHEST_PARAMETERS.min}
-                step={CHEST_PARAMETERS.step}
-                value={CHEST_PARAMETERS.default}
-                onSlidingComplete = {(val) => {this.slidingChestComplete(val)}}
-                onValueChange = {(val) => {this.slidingChest(val)}} />
-            </View>
+      <View style={styles.controller_container}>
+        <View style={styles.slider_controller_container}>
+          <Image style={styles.slider_controller_icon} source={require('./my-icon.png')}/>
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Chest: {this.state.chest}cm</Text>
+            <Slider
+              maximumValue={CHEST_PARAMETERS.max}
+              minimumValue={CHEST_PARAMETERS.min}
+              step={CHEST_PARAMETERS.step}
+              value={CHEST_PARAMETERS.default}
+              onSlidingComplete = {(val) => {this.slidingChestComplete(val)}}
+              onValueChange = {(val) => {this.slidingChest(val)}}/>
           </View>
-          <View style={styles.slider_controller_container}>
-            <Image style={styles.slider_controller_icon}
-              source={require('./my-icon.png')} />
-            <View style={styles.slider_controller_sub_container}>
-              <Text>Waist: {this.state.waist}cm</Text>
-              <Slider maximumValue={WAIST_PARAMETERS.max}
-                minimumValue={WAIST_PARAMETERS.min}
-                value={WAIST_PARAMETERS.default}
-                step={WAIST_PARAMETERS.step}
-                onSlidingComplete = {(val) => {this.slidingWaistComplete(val)}}
-                onValueChange = {(val) => {this.slidingWaist(val)}}/>
-            </View>
+        </View>
+        <View style={styles.slider_controller_container}>
+          <Image style={styles.slider_controller_icon} source={require('./my-icon.png')}/>
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Waist: {this.state.waist}cm</Text>
+            <Slider maximumValue={WAIST_PARAMETERS.max} minimumValue={WAIST_PARAMETERS.min} value={WAIST_PARAMETERS.default} step={WAIST_PARAMETERS.step} onSlidingComplete = {(val) => {this.slidingWaistComplete(val)}} onValueChange = {(val) => {this.slidingWaist(val)}}/>
           </View>
-          <View style={styles.slider_controller_container}>
-            <Image source={require('./my-icon.png')} style={styles.slider_controller_icon}/>
-            <View style={styles.slider_controller_sub_container}>
-              <Text>Hip: {this.state.hip}cm</Text>
-              <Slider
-                maximumValue={HIP_PARAMETERS.max}
-                minimumValue={HIP_PARAMETERS.min}
-                value={HIP_PARAMETERS.default}
-                step={HIP_PARAMETERS.step}
-                onSlidingComplete = {(val) => {this.slidingHipComplete(val)}}
-                onValueChange = {(val) => {this.slidingHip(val)}}/>
-            </View>
+        </View>
+        <View style={styles.slider_controller_container}>
+          <Image source={require('./my-icon.png')} style={styles.slider_controller_icon}/>
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Hip: {this.state.hip}cm</Text>
+            <Slider maximumValue={HIP_PARAMETERS.max} minimumValue={HIP_PARAMETERS.min} value={HIP_PARAMETERS.default} step={HIP_PARAMETERS.step} onSlidingComplete = {(val) => {this.slidingHipComplete(val)}} onValueChange = {(val) => {this.slidingHip(val)}}/>
           </View>
-          <View style={styles.slider_controller_container}>
-            <Image source={require('./my-icon.png')} style={styles.slider_controller_icon}/>
-            <View style={styles.slider_controller_sub_container}>
-              <Text>Height: {this.state.height}cm</Text>
-              <Slider maximumValue={HEIGHT_PARAMETERS.max}
-                minimumValue={HEIGHT_PARAMETERS.min}
-                value={HEIGHT_PARAMETERS.default}
-                step={HEIGHT_PARAMETERS.step}
-                onSlidingComplete = {(val) => {this.slidingHeightComplete(val)}}
-                onValueChange = {(val) => {this.slidingHeight(val)}}/>
-            </View>
+        </View>
+        <View style={styles.slider_controller_container}>
+          <Image source={require('./my-icon.png')} style={styles.slider_controller_icon}/>
+          <View style={styles.slider_controller_sub_container}>
+            <Text>Height: {this.state.height}cm</Text>
+            <Slider maximumValue={HEIGHT_PARAMETERS.max} minimumValue={HEIGHT_PARAMETERS.min} value={HEIGHT_PARAMETERS.default} step={HEIGHT_PARAMETERS.step} onSlidingComplete = {(val) => {this.slidingHeightComplete(val)}} onValueChange = {(val) => {this.slidingHeight(val)}}/>
+          </View>
         </View>
       </View>
-    </View>
-    );
+    </View>);
   }
 }
