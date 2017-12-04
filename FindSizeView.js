@@ -74,6 +74,9 @@ const styles = StyleSheet.create({
 });
 
 export default class FindSizeView extends React.Component {
+  static navigationOptions = {
+    title: 'Find Size Search',
+  };
   constructor(props) {
     super(props);
     this.state = {
@@ -83,21 +86,22 @@ export default class FindSizeView extends React.Component {
       height: HEIGHT_PARAMETERS.default,
 
       //TODO: initial state should carry over from previous sessions
-      bestFitBrand: 'ALLSTAR',
-      bestFitSize: '50',
-      bestFit: [
-        'ALLSTAR', 0, 0
-      ],
+      bestFitBrand: '',
+      bestFitSize: '',
+      bestFit: [],
 
-      sizeData: props.sizeData,
+      sizeData: this.props.screenProps.sizeData,
       labelPosition: new Animated.Value(0),
       labelElevation: new Animated.Value(0),
       labelHeight: new Animated.Value(60),
       flexMain: 6,
       flexInfo: new Animated.Value(1),
       labelOpacity: 1,
-      flexSlider: 2
+      flexSlider: 2,
+      fitResultArray: [],
+      perfectFitResultArray: []
     };
+    this.findSize();
   }
 
   searching() {
@@ -117,8 +121,8 @@ export default class FindSizeView extends React.Component {
     var uhlmannMensSizeArray = this.state.sizeData['UHLMANN'].MEN.sizes;
     var negriniMensSizeArray = this.state.sizeData['NEGRINI'].MEN.sizes;
 
-    var fitResultArray = [];
-    var perfectFitResultArray = [];
+    this.state.fitResultArray = [];
+    this.state.perfectFitResultArray = [];
 
     for (var brand in this.state.sizeData) {
       if (this.state.sizeData.hasOwnProperty(brand)) {
@@ -139,32 +143,31 @@ export default class FindSizeView extends React.Component {
           fitDelta = chestFit + heightFit + waistFit + hipFit;
 
           if (chestFit == 0 && heightFit == 0 && waistFit == 0 && hipFit == 0) {
-            perfectFitResultArray.push([
-              brand, allstarMensSizeArray[i].size
+            this.state.fitResultArray.push([
+              0,
+              brand,
+              allstarMensSizeArray[i].size
             ]);
           } else if (chestFit >= 0 && heightFit >= 0 && waistFit >= 0 && hipFit >= 0) {
-            fitResultArray.push([
-              fitDelta, brand, allstarMensSizeArray[i].size
+            this.state.fitResultArray.push([
+              fitDelta,
+              brand,
+              allstarMensSizeArray[i].size
             ]);
           }
         }
       }
     }
 
-    fitResultArray.sort(function(a, b) {
+    this.state.fitResultArray.sort(function(a, b) {
       return a[0] - b[0];
     });
 
-    if (perfectFitResultArray.length > 0) {
+    if (this.state.fitResultArray.length > 0) {
       this.state.bestFit = [
-        perfectFitResultArray[0][0],
-        perfectFitResultArray[0][1]
-      ];
-    } else if (fitResultArray.length > 0) {
-      this.state.bestFit = [
-        fitResultArray[0][1],
-        fitResultArray[0][2],
-        fitResultArray[0][0]
+        this.state.fitResultArray[0][1],
+        this.state.fitResultArray[0][2],
+        this.state.fitResultArray[0][0]
       ];
     } else {
       this.state.bestFit = ['No Match', '', ''];
@@ -247,6 +250,7 @@ export default class FindSizeView extends React.Component {
       labelOpacity
     } = this.state;
 
+    const { navigate } = this.props.navigation;
     return (
       <View nativeID={"root-container"} style={{
         flex: 1,
@@ -288,11 +292,19 @@ export default class FindSizeView extends React.Component {
               }
             ]}>
             <Button onPress={(val) => {
-                console.log("click");
-                Animated.timing(this.state.labelElevation, {
-                  toValue: 8,
-                  duration: 1000
-                }).start();
+                navigate('ExploreSizeView',
+                 {
+                   size: {
+                     chest: this.state.chest,
+                     waist: this.state.waist,
+                     hip: this.state.hip,
+                     height: this.state.height
+                   },
+                   fitResultArray: this.state.fitResultArray,
+                   perfectFitResultArray: this.state.perfectFitResultArray
+
+                 }
+                );
               }
             } title="More" color='blue'/>
           </View>
