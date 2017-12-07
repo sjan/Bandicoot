@@ -29,66 +29,63 @@ export default class FindSizeView extends React.Component {
     return "";
   }
 
+  fitTitleText(input) {
+    if(input.delta == 0) {
+      return "perfect fit!"
+    } else {
+      var string = "";
+      if(input.chest.fit > 0) {
+        string = string + " Chest: +" + input.chest.fit;
+      }
+
+      if(input.waist.fit > 0) {
+        string = string + " Waist: +" + input.waist.fit;
+      }
+
+      if(input.hip.fit > 0) {
+        string = string + " Hip: +" + input.hip.fit;
+      }
+
+      if(input.height.fit > 0) {
+        string = string + " Height: +" + input.height.fit;
+      }
+      return string;
+  }
+}
+
   render() {
     const {state} = this.props.navigation;
+
     return (
       <ScrollView>
-
-        <Text h3>{state.params.fitResultArray[0].brand}</Text>
-
-        <List containerStyle={{marginBottom: 20}}>
-          {
-            state.params.fitResultArray[0]['fit'].map((item, i) => (
-              <ListItem
-                key={i}
-                title={state.params.fitResultArray[0]['brand']+ " " + item[2]}
-                subtitle={"Chest: " + item[3] + " Height: " + item[4] + " Waist: " +item[5] + " Hip: " + item[6]}
-              />
-            ))
-          }
-      </List>
-
-      <Text h3>{state.params.fitResultArray[1].brand}</Text>
-
-      <List containerStyle={{marginBottom: 20}}>
         {
-          state.params.fitResultArray[1]['fit'].map((item, i) => (
-            <ListItem
-              key={i}
-              title={state.params.fitResultArray[1]['brand']+ " " + item[2]}
-              subtitle={"Chest: " + item[3] + " Height: " + item[4] + " Waist: " +item[5] + " Hip: " + item[6]}
-            />
-          ))
+          state.params.fitResultArray.map(
+            (brandItem, i) => (
+              <View
+                key={i}>
+                <Text
+                  style={{ marginLeft: 24 }}
+                      h3>{brandItem.brand}
+                </Text>
+                <List containerStyle={{marginBottom: 20}}>
+                  {
+                    brandItem.fit.map(
+                      (size, j) => (
+                      <ListItem
+                        key={j}
+                        hideChevron={true}
+                        title={"Size " + size['size'] + " " + this.fitTitleText(size) }
+                        subtitle={" Chest: " + size.chest.range.upper + " - " + size['chest']['range']['lower'] +
+                                " Waist: " + size.waist.range.upper + " - " + size['waist']['range']['lower'] +
+                                " Hip: " + size.hip.range.upper + " - " + size['hip']['range']['lower'] +
+                                " Height: " + size.height.range.upper + " - " + size['height']['range']['lower'] + " cm"}/>
+                    ))
+                  }
+                </List>
+              </View>
+            )
+          )
         }
-    </List>
-
-<Text h3>{state.params.fitResultArray[2].brand}</Text>
-
-    <List containerStyle={{marginBottom: 20}}>
-      {
-        state.params.fitResultArray[2]['fit'].map((item, i) => (
-          <ListItem
-            key={i}
-            title={state.params.fitResultArray[2]['brand']+ " " + item[2]}
-            subtitle={"Chest: " + item[3] + " Height: " + item[4] + " Waist: " +item[5] + " Hip: " + item[6]}
-          />
-        ))
-      }
-  </List>
-
-  <Text h3>{state.params.fitResultArray[3].brand}</Text>
-
-  <List containerStyle={{marginBottom: 20}}>
-    {
-      state.params.fitResultArray[3]['fit'].map((item, i) => (
-        <ListItem
-          key={i}
-          title={state.params.fitResultArray[3]['brand']+ " " + item[2]}
-          subtitle={"Chest: " + item[3] + " Height: " + item[4] + " Waist: " +item[5] + " Hip: " + item[6]}
-        />
-      ))
-    }
-</List>
       </ScrollView>
     );
   }

@@ -151,37 +151,71 @@ export default class FindSizeView extends React.Component {
 
           fitDelta = chestFit + heightFit + waistFit + hipFit;
 
-          if (chestFit == 0 && heightFit == 0 && waistFit == 0 && hipFit == 0) {
-            brandArray.push([
-              0,
-              brand,
-              allstarMensSizeArray[i].size,
-              0,
-              0,
-              0,
-              0
-            ]);
+          if (
+            chestFit == 0 &&
+            heightFit == 0 &&
+            waistFit == 0 &&
+            hipFit == 0) {
+            brandArray.push(
+              {
+                delta: 0,
+                brand: brand,
+                size: sizeObject.size,
+                chest: {
+                  fit: chestFit,
+                  range: chestRange
+                },
+                waist: {
+                  fit: waistFit,
+                  range: waistRange
+                },
+                hip: {
+                  fit: hipFit,
+                  range: hipRange
+                },
+                height: {
+                  fit: heightFit,
+                  range: heightRange
+                }
+              }
+            );
           } else if (
             chestFit >= 0 &&
             heightFit >= 0 &&
             waistFit >= 0 &&
             hipFit >= 0 ) {
-
-            brandArray.push([
-              fitDelta,
-              brand,
-              allstarMensSizeArray[i].size,
-              chestFit,
-              heightFit,
-              waistFit,
-              hipFit
-            ]);
+            brandArray.push(
+              {
+                delta: fitDelta,
+                brand: brand,
+                size: sizeObject.size,
+                chest: {
+                  fit: chestFit,
+                  range: chestRange
+                },
+                waist: {
+                  fit: waistFit,
+                  range: waistRange
+                },
+                hip: {
+                  fit: hipFit,
+                  range: hipRange
+                },
+                height: {
+                  fit: heightFit,
+                  range: heightRange
+                }
+              }
+            );
           }
         }
       }
+
       brandArray.sort(function(a, b) {
-        return a[0] - b[0];
+        return Math.max(a.chest.fit, a.waist.fit, a.hip.fit, a.height.fit) -
+              Math.max(b.chest.fit, b.waist.fit, b.hip.fit, b.height.fit);
       });
+
       fitArray.push({
         brand: brand,
         fit: brandArray
@@ -193,11 +227,11 @@ export default class FindSizeView extends React.Component {
     if(typeof fitArray !== 'undefined' &&
       fitArray.length > 0 &&
       typeof fitArray[0] !== 'undefined' &&
-      fitArray[0]["fit"].length > 0) {
+      fitArray[0].fit.length > 0) {
 
-      this.state.bestFitSize = fitArray[0]["fit"][0][2];
-      this.state.bestFitDelta = fitArray[0]["fit"][0][0];
-      this.state.bestFitBrand = fitArray[0]["brand"];
+      this.state.bestFitSize = fitArray[0].fit[0][2];
+      this.state.bestFitDelta = fitArray[0].fit[0][0];
+      this.state.bestFitBrand = fitArray[0].brand;
     } else {
       this.state.bestFitSize = "";
       this.state.bestFitDelta = "";
