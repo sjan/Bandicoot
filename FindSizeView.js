@@ -4,8 +4,8 @@ import {
   StyleSheet,
   Text,
   View,
-  Slider,
   Animated,
+  Slider,
   Image
 } from 'react-native';
 
@@ -42,20 +42,10 @@ const HEIGHT_PARAMETERS = {
 const styles = StyleSheet.create({
   slider_controller_container: {
     flex: 1,
-    backgroundColor: 'powderblue',
     flexDirection: 'row',
-    alignItems: 'center'
-  },
-  slider_controller_sub_container: {
-    flex: 1,
-    flexDirection: 'column',
-    marginLeft: 10,
-    marginRight: 10
-  },
-  slider_controller_icon: {
-    width: 40,
-    height: 40,
-    marginLeft: 5
+    alignItems: 'center',
+    marginLeft: 32,
+    marginRight: 32
   },
   label_container: {
     flexDirection: 'row',
@@ -73,10 +63,33 @@ const styles = StyleSheet.create({
   }
 });
 
+var sliderStyles = StyleSheet.create({
+  container: {
+    height: 30,
+    flex: 5
+  },
+  track: {
+    height: 2,
+    backgroundColor: '#303030',
+  },
+  thumb: {
+    width: 10,
+    height: 10,
+    backgroundColor: '#31a4db',
+    borderRadius: 10 / 2,
+    shadowColor: '#31a4db',
+    shadowOffset: {width: 0, height: 0},
+    shadowRadius: 2,
+    shadowOpacity: 1,
+  }
+});
+
+
 export default class FindSizeView extends React.Component {
   static navigationOptions = {
     title: 'Find Size Search',
   };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -98,33 +111,29 @@ export default class FindSizeView extends React.Component {
       flexInfo: new Animated.Value(1),
       labelOpacity: 1,
       flexSlider: 2,
-      fitResultArray: [],
-      perfectFitResultArray: []
+      fitResultArray: []
     };
     this.findSize();
   }
 
   searching() {
+    console.log("searching");
     this.state.bestFitSize = '';
     this.state.bestFitDelta = '';
     this.state.bestFitBrand = 'Searching...';
-
-    Animated.spring(this.state.labelHeight, {
-      toValue: 0,
-      speed: 2
-    }).start();
   }
 
   findSize() {
+    console.log("findSize");
     var pbtMensSizeArray = this.state.sizeData['PBT'].MEN.sizes;
     var allstarMensSizeArray = this.state.sizeData['ALLSTAR'].MEN.sizes;
     var uhlmannMensSizeArray = this.state.sizeData['UHLMANN'].MEN.sizes;
     var negriniMensSizeArray = this.state.sizeData['NEGRINI'].MEN.sizes;
 
-    this.state.fitResultArray = [];
-    this.state.perfectFitResultArray = [];
+    var fitArray = [];
 
     for (var brand in this.state.sizeData) {
+      var brandArray = [];
       if (this.state.sizeData.hasOwnProperty(brand)) {
         var array = this.state.sizeData[brand].MEN.sizes
         for (var i in array) {
@@ -143,39 +152,57 @@ export default class FindSizeView extends React.Component {
           fitDelta = chestFit + heightFit + waistFit + hipFit;
 
           if (chestFit == 0 && heightFit == 0 && waistFit == 0 && hipFit == 0) {
-            this.state.fitResultArray.push([
+            brandArray.push([
               0,
               brand,
-              allstarMensSizeArray[i].size
+              allstarMensSizeArray[i].size,
+              0,
+              0,
+              0,
+              0
             ]);
-          } else if (chestFit >= 0 && heightFit >= 0 && waistFit >= 0 && hipFit >= 0) {
-            this.state.fitResultArray.push([
+          } else if (
+            chestFit >= 0 &&
+            heightFit >= 0 &&
+            waistFit >= 0 &&
+            hipFit >= 0 ) {
+
+            brandArray.push([
               fitDelta,
               brand,
-              allstarMensSizeArray[i].size
+              allstarMensSizeArray[i].size,
+              chestFit,
+              heightFit,
+              waistFit,
+              hipFit
             ]);
           }
         }
       }
+      brandArray.sort(function(a, b) {
+        return a[0] - b[0];
+      });
+      fitArray.push({
+        brand: brand,
+        fit: brandArray
+      });
     }
 
-    this.state.fitResultArray.sort(function(a, b) {
-      return a[0] - b[0];
-    });
+    this.state.fitResultArray = fitArray;
 
-    if (this.state.fitResultArray.length > 0) {
-      this.state.bestFit = [
-        this.state.fitResultArray[0][1],
-        this.state.fitResultArray[0][2],
-        this.state.fitResultArray[0][0]
-      ];
+    if(typeof fitArray !== 'undefined' &&
+      fitArray.length > 0 &&
+      typeof fitArray[0] !== 'undefined' &&
+      fitArray[0]["fit"].length > 0) {
+
+      this.state.bestFitSize = fitArray[0]["fit"][0][2];
+      this.state.bestFitDelta = fitArray[0]["fit"][0][0];
+      this.state.bestFitBrand = fitArray[0]["brand"];
     } else {
-      this.state.bestFit = ['No Match', '', ''];
+      this.state.bestFitSize = "";
+      this.state.bestFitDelta = "";
+      this.state.bestFitBrand = "No Fit Found";
     }
-
-    this.state.bestFitBrand = this.state.bestFit[0];
-    this.state.bestFitSize = this.state.bestFit[1];
-    this.state.bestFitDelta = this.state.bestFit[2];
 
     Animated.spring(this.state.labelHeight, {
       toValue: 60,
@@ -201,19 +228,9 @@ export default class FindSizeView extends React.Component {
     }
   }
 
-  slidingChest(itemSelected) {
-    this.setState({chest: itemSelected});
-    this.searching();
-  }
-
   slidingChestComplete(itemSelected) {
     this.setState({chest: itemSelected});
     this.findSize();
-  }
-
-  slidingWaist(itemSelected) {
-    this.setState({waist: itemSelected})
-    this.searching();
   }
 
   slidingWaistComplete(itemSelected) {
@@ -221,24 +238,21 @@ export default class FindSizeView extends React.Component {
     this.findSize();
   }
 
-  slidingHip(itemSelected) {
-    this.setState({hip: itemSelected})
-    this.searching();
-  }
-
   slidingHipComplete(itemSelected) {
     this.setState({hip: itemSelected})
     this.findSize();
   }
 
-  slidingHeight(itemSelected) {
-    this.setState({height: itemSelected})
-    this.searching();
-  }
-
   slidingHeightComplete(itemSelected) {
     this.setState({height: itemSelected})
     this.findSize();
+  }
+
+  slidingStart() {
+    Animated.spring(this.state.labelHeight, {
+      toValue: 0,
+      speed: 2
+    }).start();
   }
 
   render() {
@@ -251,22 +265,30 @@ export default class FindSizeView extends React.Component {
     } = this.state;
 
     const { navigate } = this.props.navigation;
+
     return (
-      <View nativeID={"root-container"} style={{
-        flex: 1,
-        flexDirection: 'column'
-      }}>
-      <View nativeID={"display-container"} style={{
-          flex: 6
+      <View
+        nativeID={"root-container"}
+        style={{
+          flex: 1,
+          flexDirection: 'column'
         }}>
+      <View
+        nativeID={"display-container"}
+        style={{flex: 6}}>
         <HumanImageView
           nativeID={"human-view"}
-          chestSize={this.state.chest} waistSize={this.state.waist} hipSize={this.state.hip} fullHeight={this.state.height} style={{
+          chestSize={this.state.chest}
+          waistSize={this.state.waist}
+          hipSize={this.state.hip}
+          fullHeight={this.state.height}
+          style={{
             width: '100%',
             height: '100%',
             backgroundColor: 'skyblue'
           }}/>
-        <Animated.View style={[
+        <Animated.View
+          style={[
             {
               elevation: this.state.labelElevation,
               height: this.state.labelHeight
@@ -284,7 +306,9 @@ export default class FindSizeView extends React.Component {
             ]}>
             {this.state.bestFitBrand} {this.state.bestFitSize}
           </Text>
-          <View nativeID={"button-container"} style={[{
+          <View
+            nativeID={"button-container"}
+            style={[{
                 position: 'absolute',
                 width: 100,
                 right: 10,
@@ -301,8 +325,6 @@ export default class FindSizeView extends React.Component {
                      height: this.state.height
                    },
                    fitResultArray: this.state.fitResultArray,
-                   perfectFitResultArray: this.state.perfectFitResultArray
-
                  }
                 );
               }
@@ -310,40 +332,94 @@ export default class FindSizeView extends React.Component {
           </View>
         </Animated.View>
       </View>
+
       <View style={styles.controller_container}>
         <View style={styles.slider_controller_container}>
-          <Image style={styles.slider_controller_icon} source={require('./my-icon.png')}/>
-          <View style={styles.slider_controller_sub_container}>
-            <Text>Chest: {this.state.chest}cm</Text>
-            <Slider
-              maximumValue={CHEST_PARAMETERS.max}
-              minimumValue={CHEST_PARAMETERS.min}
-              step={CHEST_PARAMETERS.step}
-              value={CHEST_PARAMETERS.default}
-              onSlidingComplete = {(val) => {this.slidingChestComplete(val)}}
-              onValueChange = {(val) => {this.slidingChest(val)}}/>
-          </View>
+          <Text
+            style={{flex: 1}}>Chest </Text>
+        <Slider
+          value={CHEST_PARAMETERS.default}
+          step={CHEST_PARAMETERS.step}
+          maximumValue={CHEST_PARAMETERS.max}
+          minimumValue={CHEST_PARAMETERS.min}
+          style={sliderStyles.container}
+          trackStyle={sliderStyles.track}
+          thumbStyle={sliderStyles.thumb}
+          onSlidingComplete = {(val) => {this.slidingChestComplete(val)}}
+          onSlidingStart = {(val) => {this.slidingStart()} }
+          onValueChange = {(val) => {
+            this.slidingStart();
+            this.setState({chest: val});
+            this.searching();
+          }}/>
+          <Text
+            style={{flex: 1}}>{this.state.chest} cm</Text>
         </View>
+
         <View style={styles.slider_controller_container}>
-          <Image style={styles.slider_controller_icon} source={require('./my-icon.png')}/>
-          <View style={styles.slider_controller_sub_container}>
-            <Text>Waist: {this.state.waist}cm</Text>
-            <Slider maximumValue={WAIST_PARAMETERS.max} minimumValue={WAIST_PARAMETERS.min} value={WAIST_PARAMETERS.default} step={WAIST_PARAMETERS.step} onSlidingComplete = {(val) => {this.slidingWaistComplete(val)}} onValueChange = {(val) => {this.slidingWaist(val)}}/>
-          </View>
+          <Text
+            style={{flex: 1}}>Waist </Text>
+          <Slider
+            value={WAIST_PARAMETERS.default}
+            maximumValue={WAIST_PARAMETERS.max}
+            minimumValue={WAIST_PARAMETERS.min}
+            step={WAIST_PARAMETERS.step}
+            style={sliderStyles.container}
+            trackStyle={sliderStyles.track}
+            thumbStyle={sliderStyles.thumb}
+            onSlidingComplete = {(val) => {this.slidingWaistComplete(val)}}
+            onSlidingStart = {(val) => {this.slidingStart()} }
+            onValueChange = {(val) => {
+              this.slidingStart();
+              this.setState({waist: val});
+              this.searching();
+            }}/>
+            <Text
+              style={{flex: 1}}>{this.state.waist} cm</Text>
         </View>
+
         <View style={styles.slider_controller_container}>
-          <Image source={require('./my-icon.png')} style={styles.slider_controller_icon}/>
-          <View style={styles.slider_controller_sub_container}>
-            <Text>Hip: {this.state.hip}cm</Text>
-            <Slider maximumValue={HIP_PARAMETERS.max} minimumValue={HIP_PARAMETERS.min} value={HIP_PARAMETERS.default} step={HIP_PARAMETERS.step} onSlidingComplete = {(val) => {this.slidingHipComplete(val)}} onValueChange = {(val) => {this.slidingHip(val)}}/>
-          </View>
+          <Text
+            style={{flex: 1}}>Hip </Text>
+          <Slider
+            value={HIP_PARAMETERS.default}
+            maximumValue={HIP_PARAMETERS.max}
+            minimumValue={HIP_PARAMETERS.min}
+            step={HIP_PARAMETERS.step}
+            style={sliderStyles.container}
+            trackStyle={sliderStyles.track}
+            thumbStyle={sliderStyles.thumb}
+            onSlidingComplete = {(val) => {this.slidingHipComplete(val)}}
+            onSlidingStart = {(val) => {this.slidingStart()} }
+            onValueChange = {(val) => {
+              this.slidingStart();
+              this.setState({hip: val});
+              this.searching();
+            }}/>
+            <Text
+              style={{flex: 1}}>{this.state.hip} cm</Text>
         </View>
+
         <View style={styles.slider_controller_container}>
-          <Image source={require('./my-icon.png')} style={styles.slider_controller_icon}/>
-          <View style={styles.slider_controller_sub_container}>
-            <Text>Height: {this.state.height}cm</Text>
-            <Slider maximumValue={HEIGHT_PARAMETERS.max} minimumValue={HEIGHT_PARAMETERS.min} value={HEIGHT_PARAMETERS.default} step={HEIGHT_PARAMETERS.step} onSlidingComplete = {(val) => {this.slidingHeightComplete(val)}} onValueChange = {(val) => {this.slidingHeight(val)}}/>
-          </View>
+          <Text
+            style={{flex: 1}}>Height </Text>
+          <Slider
+            value={HEIGHT_PARAMETERS.default}
+            maximumValue={HEIGHT_PARAMETERS.max}
+            minimumValue={HEIGHT_PARAMETERS.min}
+            step={HEIGHT_PARAMETERS.step}
+            style={sliderStyles.container}
+            trackStyle={sliderStyles.track}
+            thumbStyle={sliderStyles.thumb}
+            onSlidingComplete = {(val) => {this.slidingHeightComplete(val)}}
+            onSlidingStart = {(val) => {this.slidingStart()} }
+            onValueChange = {(val) => {
+              this.slidingStart();
+              this.setState({height: val});
+              this.searching();
+            }}/>
+            <Text
+              style={{flex: 1}}>{this.state.height} cm</Text>
         </View>
       </View>
     </View>);

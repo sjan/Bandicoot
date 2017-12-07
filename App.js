@@ -30,11 +30,7 @@ const FencingFitApp  = StackNavigator({
 export default class App extends React.Component {
   render() {
     return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        backgroundColor: '#ecf0f1'
-        }}>
+      <View style={{ flex: 1 }}>
         <FencingFitApp
           style={{ width: Dimensions.get("window").width }}
           screenProps={{ sizeData: sizeData }}/>
