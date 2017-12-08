@@ -84,7 +84,6 @@ var sliderStyles = StyleSheet.create({
   }
 });
 
-
 export default class FindSizeView extends React.Component {
   static navigationOptions = {
     title: 'Find Size Search',
@@ -109,7 +108,7 @@ export default class FindSizeView extends React.Component {
       labelHeight: new Animated.Value(60),
       flexMain: 6,
       flexInfo: new Animated.Value(1),
-      labelOpacity: 1,
+      labelOpacity: new Animated.Value(1),
       flexSlider: 2,
       fitResultArray: []
     };
@@ -131,6 +130,11 @@ export default class FindSizeView extends React.Component {
     var negriniMensSizeArray = this.state.sizeData['NEGRINI'].MEN.sizes;
 
     var fitArray = [];
+    var bestFitSize =   {
+        brand: "None found",
+        size: "",
+        fitDelta: 100
+      };
 
     for (var brand in this.state.sizeData) {
       var brandArray = [];
@@ -151,39 +155,17 @@ export default class FindSizeView extends React.Component {
 
           fitDelta = chestFit + heightFit + waistFit + hipFit;
 
-          if (
-            chestFit == 0 &&
-            heightFit == 0 &&
-            waistFit == 0 &&
-            hipFit == 0) {
-            brandArray.push(
-              {
-                delta: 0,
-                brand: brand,
-                size: sizeObject.size,
-                chest: {
-                  fit: chestFit,
-                  range: chestRange
-                },
-                waist: {
-                  fit: waistFit,
-                  range: waistRange
-                },
-                hip: {
-                  fit: hipFit,
-                  range: hipRange
-                },
-                height: {
-                  fit: heightFit,
-                  range: heightRange
-                }
-              }
-            );
-          } else if (
-            chestFit >= 0 &&
-            heightFit >= 0 &&
-            waistFit >= 0 &&
-            hipFit >= 0 ) {
+          if (Math.min(chestFit, waistFit, hipFit, heightFit) >= 0 &&
+          Math.max(chestFit, waistFit, hipFit, heightFit) <= 15 &&
+              fitDelta <= bestFitSize.fitDelta) {
+              bestFitSize.fitDelta = fitDelta;
+              bestFitSize.size = sizeObject.size
+              bestFitSize.brand = brand;
+          }
+
+          if (Math.min(chestFit, waistFit, hipFit, heightFit) >= 0 &&
+              Math.max(chestFit, waistFit, hipFit, heightFit) <= 15
+          ) {
             brandArray.push(
               {
                 delta: fitDelta,
@@ -224,23 +206,13 @@ export default class FindSizeView extends React.Component {
 
     this.state.fitResultArray = fitArray;
 
-    if(typeof fitArray !== 'undefined' &&
-      fitArray.length > 0 &&
-      typeof fitArray[0] !== 'undefined' &&
-      fitArray[0].fit.length > 0) {
+    this.state.bestFitSize = bestFitSize.size;
+    this.state.bestFitDelta = bestFitSize.fitDelta;
+    this.state.bestFitBrand = "Best fit: " + bestFitSize.brand;
 
-      this.state.bestFitSize = fitArray[0].fit[0][2];
-      this.state.bestFitDelta = fitArray[0].fit[0][0];
-      this.state.bestFitBrand = fitArray[0].brand;
-    } else {
-      this.state.bestFitSize = "";
-      this.state.bestFitDelta = "";
-      this.state.bestFitBrand = "No Fit Found";
-    }
-
-    Animated.spring(this.state.labelHeight, {
-      toValue: 60,
-      tension: 50
+    Animated.spring(this.state.labelOpacity, {
+      toValue: 1,
+      tension: 20
     }).start();
   }
 
@@ -283,9 +255,9 @@ export default class FindSizeView extends React.Component {
   }
 
   slidingStart() {
-    Animated.spring(this.state.labelHeight, {
+    Animated.spring(this.state.labelOpacity, {
       toValue: 0,
-      speed: 2
+      tension: 20
     }).start();
   }
 
@@ -325,17 +297,14 @@ export default class FindSizeView extends React.Component {
           style={[
             {
               elevation: this.state.labelElevation,
-              height: this.state.labelHeight
+              height: this.state.labelHeight,
+              opacity: this.state.labelOpacity,
+              justifyContent: 'center',
+              alignItems: 'center'
             },
             styles.label_container
           ]}>
           <Text style={[
-              {
-                position: 'absolute',
-                left: 10,
-                top: 10,
-                textAlign: 'center'
-              },
               styles.size_label_text
             ]}>
             {this.state.bestFitBrand} {this.state.bestFitSize}
@@ -350,19 +319,22 @@ export default class FindSizeView extends React.Component {
               }
             ]}>
             <Button onPress={(val) => {
-                navigate('ExploreSizeView',
-                 {
-                   size: {
-                     chest: this.state.chest,
-                     waist: this.state.waist,
-                     hip: this.state.hip,
-                     height: this.state.height
-                   },
-                   fitResultArray: this.state.fitResultArray,
-                 }
+                navigate(
+                  'ExploreSizeView',
+                   {
+                     size: {
+                       chest: this.state.chest,
+                       waist: this.state.waist,
+                       hip: this.state.hip,
+                       height: this.state.height
+                     },
+                     fitResultArray: this.state.fitResultArray,
+                   }
                 );
               }
-            } title="More" color='blue'/>
+            }
+            title="More"
+            color='blue'/>
           </View>
         </Animated.View>
       </View>
@@ -454,7 +426,7 @@ export default class FindSizeView extends React.Component {
             }}/>
             <Text
               style={{flex: 1}}>{this.state.height} cm</Text>
-        </View>
+        </View>      
       </View>
     </View>);
   }

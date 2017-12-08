@@ -18,14 +18,43 @@ let sizeData = {
   "NEGRINI": require('./resources/negrini_2017.json')
 };
 
-const FencingFitApp  = StackNavigator({
-  FindSizeView: {
-    screen: FindSizeView
+let MyTransition = (index, position) => {
+    const inputRange = [index - 1, index, index + 1];
+    const outputRange = [.1, 1, 1];
+    const opacity = position.interpolate({
+        inputRange,
+        outputRange,
+    });
+
+    return {
+      opacity
+    };
+};
+
+
+let TransitionConfiguration = () => {
+    return {
+        // Define scene interpolation, eq. custom transition
+        screenInterpolator: (sceneProps) => {
+            const {position, scene} = sceneProps;
+            const {index} = scene;
+            return MyTransition(index, position);
+        }
+    }
+};
+
+const FencingFitApp  = StackNavigator(
+  {
+    FindSizeView: {
+      screen: FindSizeView
+    },
+    ExploreSizeView: {
+      screen: ExploreSizeView
+    }
   },
-  ExploreSizeView: {
-    screen: ExploreSizeView
-  },
-});
+  {
+      transitionConfig: TransitionConfiguration
+  });
 
 export default class App extends React.Component {
   render() {

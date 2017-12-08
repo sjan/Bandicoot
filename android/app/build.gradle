@@ -94,9 +94,20 @@ def enableSeparateBuildPerCPUArchitecture = false
  */
 def enableProguardInReleaseBuilds = false
 
+
 android {
     compileSdkVersion 23
     buildToolsVersion '26.0.2'
+
+    signingConfigs {
+        release {
+            if (project.hasProperty('BANDICOOT_RELEASE_STORE_FILE')) {
+                storeFile file(BANDICOOT_RELEASE_STORE_FILE)
+                keyAlias BANDICOOT_RELEASE_KEY_ALIAS
+                keyPassword BANDICOOT_RELEASE_KEY_PASSWORD
+            }
+        }
+    }
 
     defaultConfig {
         applicationId "com.bandicoot"
@@ -118,6 +129,7 @@ android {
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -149,3 +161,4 @@ task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.compile
     into 'libs'
 }
+
