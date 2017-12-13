@@ -129,18 +129,16 @@ disableBrand(brand) {
   render() {
     const {state} = this.props.navigation;
     var showAll = this.state.showAll;
-    console.log("render " + JSON.stringify(this.props.fitResultArray));
 
     return (
       <ScrollView>
         {
-
           state.params.fitResultArray.filter(function(brandData) {
-            if(brandData.fit.length <= 0) {
-                return false;
-            } else {
-                return true;
-            }
+              if(brandData.fit.length <= 0) {
+                  return false;
+              } else {
+                  return true;
+              }
 
             }).map(
             (brandItem, i) => (
@@ -149,12 +147,12 @@ disableBrand(brand) {
                   height: 48,
                   justifyContent: 'center'
                 }}>
-                  <Text style={{
-                    marginLeft: 72,
-                    fontSize: 18
-                  }}>
-                    {brandItem.brand}
-                  </Text>
+                <Text style={{
+                  marginLeft: 72,
+                  fontSize: 18
+                }}>
+                  {brandItem.brand}
+                </Text>
               </View>
               <View style={{
                   flexDirection: 'row',
@@ -185,7 +183,9 @@ disableBrand(brand) {
                   {
                     brandItem.fit.filter(function(sizeData) {
                       if(!showAll[brandItem.brand]) {
-                        if(sizeData.delta > 4) {
+                        if(sizeData.size == brandItem.bestFit.size) {
+                          return true;
+                        } else if(sizeData.delta > 4) {
                           return false;
                         } else {
                           return true;

@@ -29,6 +29,9 @@ class Util {
     //iterate therough brands
     for (var brand in sizeData) {
       var brandArray = [];
+      var bestBrandFitSize = {
+          fitDelta: 100
+      };
 
       if (sizeData.hasOwnProperty(brand)) {
         var array = sizeData[brand][type].sizes;
@@ -61,6 +64,16 @@ class Util {
                     bestFitSize.bestFitWaistDelta = waistFit;
                     bestFitSize.bestFitHeightDelta = heightFit;
                 }
+
+                if (fitDelta <= bestBrandFitSize.fitDelta) {
+                      bestBrandFitSize.brand = brand;
+                      bestBrandFitSize.fitDelta = fitDelta;
+                      bestBrandFitSize.size = sizeObject.size
+                      bestBrandFitSize.bestFitChestDelta = chestFit;
+                      bestBrandFitSize.bestFitHipDelta = hipFit;
+                      bestBrandFitSize.bestFitWaistDelta = waistFit;
+                      bestBrandFitSize.bestFitHeightDelta = heightFit;
+                  }
 
                 brandArray.push(
                   {
@@ -95,7 +108,8 @@ class Util {
 
       fitArray.push({
         brand: brand,
-        fit: brandArray
+        bestFit: bestBrandFitSize,
+        fit: brandArray        
       });
     }
 
