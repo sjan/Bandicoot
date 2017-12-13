@@ -160,7 +160,7 @@ public class HumanView extends View {
         }
 
         float centerOffsetX = - X_MIN_POINT - X_WIDTH/2;
-        float centerOffsetY = - Y_MIN_POINT - Y_HEIGHT/2;
+        float centerOffsetY = - Y_MIN_POINT - Y_HEIGHT/4;
 
         for (int index=0;index<pointList.size();index++) {
             Point p = pointList.get(index);

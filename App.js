@@ -31,7 +31,6 @@ let MyTransition = (index, position) => {
     };
 };
 
-
 let TransitionConfiguration = () => {
     return {
         // Define scene interpolation, eq. custom transition
@@ -46,14 +45,20 @@ let TransitionConfiguration = () => {
 const FencingFitApp  = StackNavigator(
   {
     FindSizeView: {
-      screen: FindSizeView
+      screen: FindSizeView,
+      navigationOptions: {
+          header: null
+      }
     },
     ExploreSizeView: {
-      screen: ExploreSizeView
+      screen: ExploreSizeView,
+      navigationOptions: {
+          header: null
+      }
     }
   },
   {
-      transitionConfig: TransitionConfiguration
+      transitionConfig: TransitionConfiguration,
   });
 
 export default class App extends React.Component {

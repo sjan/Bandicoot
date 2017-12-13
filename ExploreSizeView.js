@@ -1,13 +1,6 @@
 import React from 'react';
-import { Text, List, ListItem } from 'react-native-elements';
+import { Text, List, ListItem, Icon, Button  } from 'react-native-elements';
 import { View, ScrollView, FlatList, StyleSheet } from 'react-native';
-
-let sizeData = {
-  "ALLSTAR": require('./resources/allstar_2017.json'),
-  "UHLMANN": require('./resources/uhlmann_2017.json'),
-  "PBT": require('./resources/pbt_2017.json'),
-  "NEGRINI": require('./resources/negrini_2017.json')
-};
 
 export default class FindSizeView extends React.Component {
   static navigationOptions = {
@@ -16,17 +9,49 @@ export default class FindSizeView extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      showAll: {
+        PBT: false,
+        NEGRINI: false,
+        UHLMANN: false,
+        ALLSTAR: false,
+      }
+    };
   }
 
-  lookupSize(brand, type, size) {
-    var sizes = sizeData[brand].MEN.sizes;
-    for(i=0;i<sizes.length;i++) {
-       if(sizes[i]["size"] == size) {
-         return sizes[i];
-       }
+  fitIcon(fit) {
+    var icon;
+    var color;
+
+    if(fit == 0) {
+      icon = 'done';
+    } else if(fit < 0) {
+      icon = 'arrow-downward';
+    } else if (fit > 0) {
+      icon = 'arrow-upward';
     }
-    return "";
+
+    if(Math.abs(fit) == 0) {
+      color = 'green'
+    } else if(Math.abs(fit) < 2) {
+      color = 'orange'
+    } else if(Math.abs(fit) < 4) {
+      color = 'orange'
+    } else if(Math.abs(fit) < 6) {
+      color = 'red'
+    } else {
+      color = 'red'
+    }
+
+  return (
+    <Icon
+      style={{
+        flex: 2,
+      }}
+      reverse
+      name={icon}
+      color={color} />
+    );
   }
 
   fitTitleText(input) {
@@ -53,35 +78,165 @@ export default class FindSizeView extends React.Component {
   }
 }
 
+hideShowButton(brand) {
+    if(this.state.showAll[brand]) {
+      return "Hide";
+    } else {
+      return "Show";
+    }
+}
+
+enableBrand(brand) {
+  var obj;
+  if(this.state.showAll[brand]) {
+     obj = {
+       showAll: {
+         PBT: false,
+         NEGRINI: false,
+         UHLMANN: false,
+         ALLSTAR: false,
+       }
+     }
+  } else {
+     obj = {
+       showAll: {
+         PBT: false,
+         NEGRINI: false,
+         UHLMANN: false,
+         ALLSTAR: false,
+       }
+     }
+     obj.showAll[brand] = true;
+  }
+  return obj;
+}
+
+disableBrand(brand) {
+  var obj = {
+     showAll: {
+       PBT: false,
+       NEGRINI: false,
+       UHLMANN: false,
+       ALLSTAR: false,
+     }
+   }
+
+   obj.showAll[brand] = true;
+   console.log(JSON.stringify(obj));
+   return obj;
+}
+
   render() {
     const {state} = this.props.navigation;
+    var showAll = this.state.showAll;
+    console.log("render " + JSON.stringify(this.props.fitResultArray));
 
     return (
       <ScrollView>
         {
-          state.params.fitResultArray.map(
+
+          state.params.fitResultArray.filter(function(brandData) {
+            if(brandData.fit.length <= 0) {
+                return false;
+            } else {
+                return true;
+            }
+
+            }).map(
             (brandItem, i) => (
-              <View
-                key={i}>
-                <Text
-                  style={{ marginLeft: 24 }}
-                      h3>{brandItem.brand}
-                </Text>
-                <List containerStyle={{marginBottom: 20}}>
+              <View key={i}>
+                <View style={{
+                  height: 48,
+                  justifyContent: 'center'
+                }}>
+                  <Text style={{
+                    marginLeft: 72,
+                    fontSize: 18
+                  }}>
+                    {brandItem.brand}
+                  </Text>
+              </View>
+              <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  height: 48
+                }}>
+                  <Text style={{
+                    marginLeft: 16,
+                    flex: 2
+                  }}>
+                    Size
+                  </Text>
+                  <Text style={{
+                    flex: 1,
+                  }}>Chest</Text>
+                  <Text style={{
+                    flex: 1,
+                  }}>Waist</Text>
+                  <Text style={{
+                    flex: 1,
+                  }}>Hip</Text>
+                  <Text style={{
+                    flex: 1,
+                  }}>Height</Text>
+                </View>
+
+                <List>
                   {
-                    brandItem.fit.map(
-                      (size, j) => (
+                    brandItem.fit.filter(function(sizeData) {
+                      if(!showAll[brandItem.brand]) {
+                        if(sizeData.delta > 4) {
+                          return false;
+                        } else {
+                          return true;
+                        }
+                      } else {
+                        return true;
+                      }
+                    }).map(
+                      (sizeItem, j) => (
                       <ListItem
                         key={j}
                         hideChevron={true}
-                        title={"Size " + size['size'] + " " + this.fitTitleText(size) }
-                        subtitle={" Chest: " + size.chest.range.upper + " - " + size['chest']['range']['lower'] +
-                                " Waist: " + size.waist.range.upper + " - " + size['waist']['range']['lower'] +
-                                " Hip: " + size.hip.range.upper + " - " + size['hip']['range']['lower'] +
-                                " Height: " + size.height.range.upper + " - " + size['height']['range']['lower'] + " cm"}/>
+                        style={{
+                          underlayColor: 'blue',
+                          height: 12
+                        }}
+                        title={
+                          <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}>
+                          <Text style={{
+                            flex: 1,
+                            fontSize: 24}}
+                            >{sizeItem.size}
+                          </Text>
+                          {this.fitIcon(sizeItem.chest.fit)}
+                          {this.fitIcon(sizeItem.waist.fit)}
+                          {this.fitIcon(sizeItem.hip.fit)}
+                          {this.fitIcon(sizeItem.height.fit)}
+                          </View>
+                        }/>
                     ))
                   }
                 </List>
+                <View style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      margin: 12,
+                      justifyContent: 'center'
+                    }}>
+                    <Button
+                      small
+                      raised
+                      borderRadius = {3}
+                      title={this.hideShowButton(brandItem.brand)}
+                      onPress={(val) => {
+                          this.setState(this.enableBrand(brandItem.brand))
+                      }}
+                    />
+                </View>
               </View>
             )
           )

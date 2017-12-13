@@ -1,15 +1,28 @@
 import React from 'react';
 import {
-  Button,
   StyleSheet,
-  Text,
   View,
   Animated,
   Slider,
-  Image
+  Image,
+  Picker,
+  Text
 } from 'react-native';
 
+import { Button } from 'react-native-elements';
 import HumanImageView from './HumanView';
+import SizeListItem from './SizeListItem';
+import Util from './Util';
+
+const PARAMETERS = {
+  LABEL_HEIGHT: 120,
+  LABEL_HEIGHT_HIDE: 20,
+  INITIAL_SELECTION_BRAND: 'ALL',
+  INITIAL_SELECTION_TYPE: 'MEN',
+  INITIAL_SELECTION_MEASUREMENT: 'METRIC',
+  LABEL_ELEVATION: 5,
+  ANIMATION_TENSION: 20
+}
 
 const CHEST_PARAMETERS = {
   min: 62,
@@ -48,18 +61,19 @@ const styles = StyleSheet.create({
     marginRight: 32
   },
   label_container: {
-    flexDirection: 'row',
     position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: 'lightyellow'
+    top: -20,
+    left: '2%',
+    right: '2%',
+    width: '96%',
+    backgroundColor: 'white'
   },
   size_label_text: {
     height: 30
   },
   controller_container: {
     flexDirection: 'column',
-    flex: 4
+    flex: 6
   }
 });
 
@@ -91,182 +105,190 @@ export default class FindSizeView extends React.Component {
 
   constructor(props) {
     super(props);
+
+    var sizeResult = Util.computeSize(
+      PARAMETERS.INITIAL_SELECTION_BRAND,
+      PARAMETERS.INITIAL_SELECTION_TYPE,
+      this.props.screenProps.sizeData,
+      CHEST_PARAMETERS.default,
+      HEIGHT_PARAMETERS.default,
+      WAIST_PARAMETERS.default,
+      HIP_PARAMETERS.default
+    );
+
     this.state = {
+      sizeData: this.props.screenProps.sizeData,
+
+      type: PARAMETERS.INITIAL_SELECTION_TYPE,
       chest: CHEST_PARAMETERS.default,
       waist: WAIST_PARAMETERS.default,
       hip: HIP_PARAMETERS.default,
       height: HEIGHT_PARAMETERS.default,
 
-      //TODO: initial state should carry over from previous sessions
-      bestFitBrand: '',
-      bestFitSize: '',
-      bestFit: [],
-
-      sizeData: this.props.screenProps.sizeData,
-      labelPosition: new Animated.Value(0),
-      labelElevation: new Animated.Value(0),
-      labelHeight: new Animated.Value(60),
-      flexMain: 6,
-      flexInfo: new Animated.Value(1),
+      labelElevation: new Animated.Value(PARAMETERS.LABEL_ELEVATION),
+      labelHeight: new Animated.Value(PARAMETERS.LABEL_HEIGHT),
       labelOpacity: new Animated.Value(1),
-      flexSlider: 2,
-      fitResultArray: []
+
+      fitResultArray: sizeResult.fitArray,
+      bestFitBrand: sizeResult.bestFitBrand,
+      bestFitSize: sizeResult.bestFitSize,
+      bestFitChestDelta: sizeResult.bestFitChestDelta,
+      bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+      bestFitHipDelta: sizeResult.bestFitHipDelta,
+      bestFitHeightDelta: sizeResult.bestFitHeightDelta,
+      selectionBrand: PARAMETERS.INITIAL_SELECTION_BRAND,
     };
-    this.findSize();
   }
 
   searching() {
     console.log("searching");
-    this.state.bestFitSize = '';
-    this.state.bestFitDelta = '';
-    this.state.bestFitBrand = 'Searching...';
-  }
-
-  findSize() {
-    console.log("findSize");
-    var pbtMensSizeArray = this.state.sizeData['PBT'].MEN.sizes;
-    var allstarMensSizeArray = this.state.sizeData['ALLSTAR'].MEN.sizes;
-    var uhlmannMensSizeArray = this.state.sizeData['UHLMANN'].MEN.sizes;
-    var negriniMensSizeArray = this.state.sizeData['NEGRINI'].MEN.sizes;
-
-    var fitArray = [];
-    var bestFitSize =   {
-        brand: "None found",
-        size: "",
-        fitDelta: 100
-      };
-
-    for (var brand in this.state.sizeData) {
-      var brandArray = [];
-      if (this.state.sizeData.hasOwnProperty(brand)) {
-        var array = this.state.sizeData[brand].MEN.sizes
-        for (var i in array) {
-          var sizeObject = array[i];
-
-          chestRange = sizeObject.chest;
-          heightRange = sizeObject.height;
-          waistRange = sizeObject.waist;
-          hipRange = sizeObject.hip;
-
-          chestFit = this.fit(chestRange, this.state.chest);
-          heightFit = this.fit(heightRange, this.state.height);
-          waistFit = this.fit(waistRange, this.state.waist);
-          hipFit = this.fit(hipRange, this.state.hip);
-
-          fitDelta = chestFit + heightFit + waistFit + hipFit;
-
-          if (Math.min(chestFit, waistFit, hipFit, heightFit) >= 0 &&
-          Math.max(chestFit, waistFit, hipFit, heightFit) <= 15 &&
-              fitDelta <= bestFitSize.fitDelta) {
-              bestFitSize.fitDelta = fitDelta;
-              bestFitSize.size = sizeObject.size
-              bestFitSize.brand = brand;
-          }
-
-          if (Math.min(chestFit, waistFit, hipFit, heightFit) >= 0 &&
-              Math.max(chestFit, waistFit, hipFit, heightFit) <= 15
-          ) {
-            brandArray.push(
-              {
-                delta: fitDelta,
-                brand: brand,
-                size: sizeObject.size,
-                chest: {
-                  fit: chestFit,
-                  range: chestRange
-                },
-                waist: {
-                  fit: waistFit,
-                  range: waistRange
-                },
-                hip: {
-                  fit: hipFit,
-                  range: hipRange
-                },
-                height: {
-                  fit: heightFit,
-                  range: heightRange
-                }
-              }
-            );
-          }
-        }
-      }
-
-      brandArray.sort(function(a, b) {
-        return Math.max(a.chest.fit, a.waist.fit, a.hip.fit, a.height.fit) -
-              Math.max(b.chest.fit, b.waist.fit, b.hip.fit, b.height.fit);
-      });
-
-      fitArray.push({
-        brand: brand,
-        fit: brandArray
-      });
-    }
-
-    this.state.fitResultArray = fitArray;
-
-    this.state.bestFitSize = bestFitSize.size;
-    this.state.bestFitDelta = bestFitSize.fitDelta;
-    this.state.bestFitBrand = "Best fit: " + bestFitSize.brand;
-
-    Animated.spring(this.state.labelOpacity, {
-      toValue: 1,
-      tension: 20
-    }).start();
-  }
-
-  inRange(range, size) {
-    if (size >= range.lower && size <= range.upper) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  fit(range, size) {
-    if (size >= range.lower && size <= range.upper) {
-      return 0;
-    } else if (size < range.lower) {
-      return (range.lower - size);
-    } else if (size > range.upper) {
-      return (range.upper - size);
-    }
   }
 
   slidingChestComplete(itemSelected) {
-    this.setState({chest: itemSelected});
-    this.findSize();
+    var sizeResult = Util.computeSize(
+      this.state.selectionBrand,
+      this.state.type,
+      this.state.sizeData,
+      itemSelected,
+      this.state.height,
+      this.state.waist,
+      this.state.hip
+    );
+
+    this.setState(
+      {
+        chest: itemSelected,
+        fitResultArray: sizeResult.fitArray,
+        bestFitBrand: sizeResult.bestFitBrand,
+        bestFitSize: sizeResult.bestFitSize,
+        bestFitChestDelta: sizeResult.bestFitChestDelta,
+        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+        bestFitHipDelta: sizeResult.bestFitHipDelta,
+        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
+      }
+    );
   }
 
   slidingWaistComplete(itemSelected) {
-    this.setState({waist: itemSelected})
-    this.findSize();
+    var sizeResult = Util.computeSize(
+      this.state.selectionBrand,
+      this.state.type,
+      this.state.sizeData,
+      this.state.chest,
+      this.state.height,
+      itemSelected,
+      this.state.hip
+    );
+
+    this.setState(
+      {
+        waist: itemSelected,
+        fitResultArray: sizeResult.fitArray,
+        bestFitBrand: sizeResult.bestFitBrand,
+        bestFitSize: sizeResult.bestFitSize,
+        bestFitChestDelta: sizeResult.bestFitChestDelta,
+        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+        bestFitHipDelta: sizeResult.bestFitHipDelta,
+        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
+      }
+    );
   }
 
   slidingHipComplete(itemSelected) {
-    this.setState({hip: itemSelected})
-    this.findSize();
+    var sizeResult = Util.computeSize(
+      this.state.selectionBrand,
+      this.state.type,
+      this.state.sizeData,
+      this.state.chest,
+      this.state.height,
+      this.state.waist,
+      itemSelected
+    );
+
+    this.setState(
+      {
+        hip: itemSelected,
+        fitResultArray: sizeResult.fitArray,
+        bestFitBrand: sizeResult.bestFitBrand,
+        bestFitSize: sizeResult.bestFitSize,
+        bestFitChestDelta: sizeResult.bestFitChestDelta,
+        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+        bestFitHipDelta: sizeResult.bestFitHipDelta,
+        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
+      }
+    );
   }
 
-  slidingHeightComplete(itemSelected) {
-    this.setState({height: itemSelected})
-    this.findSize();
-  }
-
-  slidingStart() {
-    Animated.spring(this.state.labelOpacity, {
-      toValue: 0,
-      tension: 20
+  showBest() {
+    Animated.spring(
+      this.state.labelHeight, {
+      toValue: PARAMETERS.LABEL_HEIGHT,
+      tension: PARAMETERS.ANIMATION_TENSION
     }).start();
+  }
+
+  hideBest() {
+    Animated.spring(
+      this.state.labelHeight, {
+      toValue: PARAMETERS.LABEL_HEIGHT_HIDE,
+      tension: PARAMETERS.ANIMATION_TENSION
+    }).start();
+  }
+
+  updateSelectionBrand(selectionBrand) {
+    var sizeResult = Util.computeSize(
+      selectionBrand,
+      this.state.type,
+      this.state.sizeData,
+      this.state.chest,
+      this.state.height,
+      this.state.waist,
+      this.state.hip
+    );
+
+    this.setState(
+      {
+        selectionBrand: selectionBrand,
+        fitResultArray: sizeResult.fitArray,
+        bestFitBrand: sizeResult.bestFitBrand,
+        bestFitSize: sizeResult.bestFitSize,
+        bestFitChestDelta: sizeResult.bestFitChestDelta,
+        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+        bestFitHipDelta: sizeResult.bestFitHipDelta,
+        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
+      }
+    );
+  }
+
+  slidingHeightComplete(height) {
+    var sizeResult = Util.computeSize(
+      this.state.selectionBrand,
+      this.state.type,
+      this.state.sizeData,
+      this.state.chest,
+      height,
+      this.state.waist,
+      this.state.hip
+    );
+
+    this.setState(
+      {
+        height: height,
+        fitResultArray: sizeResult.fitArray,
+        bestFitBrand: sizeResult.bestFitBrand,
+        bestFitSize: sizeResult.bestFitSize,
+        bestFitChestDelta: sizeResult.bestFitChestDelta,
+        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+        bestFitHipDelta: sizeResult.bestFitHipDelta,
+        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
+      }
+    );
   }
 
   render() {
     let {
-      labelPosition,
       labelElevation,
       labelHeight,
-      flexInfo,
       labelOpacity
     } = this.state;
 
@@ -277,7 +299,8 @@ export default class FindSizeView extends React.Component {
         nativeID={"root-container"}
         style={{
           flex: 1,
-          flexDirection: 'column'
+          flexDirection: 'column',
+          marginBottom: 24
         }}>
       <View
         nativeID={"display-container"}
@@ -293,53 +316,39 @@ export default class FindSizeView extends React.Component {
             height: '100%',
             backgroundColor: 'skyblue'
           }}/>
+        </View>
         <Animated.View
           style={[
             {
               elevation: this.state.labelElevation,
-              height: this.state.labelHeight,
+              height: labelHeight,
               opacity: this.state.labelOpacity,
-              justifyContent: 'center',
-              alignItems: 'center'
+              flexDirection: 'column',
             },
             styles.label_container
           ]}>
-          <Text style={[
-              styles.size_label_text
-            ]}>
-            {this.state.bestFitBrand} {this.state.bestFitSize}
-          </Text>
-          <View
-            nativeID={"button-container"}
-            style={[{
-                position: 'absolute',
-                width: 100,
-                right: 10,
-                top: 10
-              }
-            ]}>
-            <Button onPress={(val) => {
-                navigate(
-                  'ExploreSizeView',
-                   {
-                     size: {
-                       chest: this.state.chest,
-                       waist: this.state.waist,
-                       hip: this.state.hip,
-                       height: this.state.height
-                     },
-                     fitResultArray: this.state.fitResultArray,
-                   }
-                );
-              }
-            }
-            title="More"
-            color='blue'/>
-          </View>
-        </Animated.View>
-      </View>
 
+          <SizeListItem header = 'true'/>
+          <SizeListItem
+            chestFit = {this.state.bestFitChestDelta}
+            waistFit = {this.state.bestFitWaistDelta}
+            hipFit = {this.state.bestFitHipDelta}
+            heightFit = {this.state.bestFitHeightDelta}
+            label = {this.state.bestFitBrand + " " + this.state.bestFitSize}>
+          </SizeListItem>
+        </Animated.View>
       <View style={styles.controller_container}>
+        <View style={{
+            flex: 1,
+            alignItems: 'center',
+            marginTop: 24,
+            marginLeft: 32,
+            marginRight: 32
+          }}>
+          <Text
+              style={{fontSize: 20}}
+              > Set Your Dimensions </Text>
+        </View>
         <View style={styles.slider_controller_container}>
           <Text
             style={{flex: 1}}>Chest </Text>
@@ -351,12 +360,15 @@ export default class FindSizeView extends React.Component {
           style={sliderStyles.container}
           trackStyle={sliderStyles.track}
           thumbStyle={sliderStyles.thumb}
-          onSlidingComplete = {(val) => {this.slidingChestComplete(val)}}
-          onSlidingStart = {(val) => {this.slidingStart()} }
+          onSlidingComplete = {(val) =>
+            {
+              this.slidingChestComplete(val);
+              this.showBest();
+            }
+          }
           onValueChange = {(val) => {
-            this.slidingStart();
             this.setState({chest: val});
-            this.searching();
+            this.hideBest();
           }}/>
           <Text
             style={{flex: 1}}>{this.state.chest} cm</Text>
@@ -373,12 +385,15 @@ export default class FindSizeView extends React.Component {
             style={sliderStyles.container}
             trackStyle={sliderStyles.track}
             thumbStyle={sliderStyles.thumb}
-            onSlidingComplete = {(val) => {this.slidingWaistComplete(val)}}
-            onSlidingStart = {(val) => {this.slidingStart()} }
+            onSlidingComplete = {(val) =>
+              {
+                this.slidingWaistComplete(val);
+                this.showBest();
+              }
+            }
             onValueChange = {(val) => {
-              this.slidingStart();
               this.setState({waist: val});
-              this.searching();
+              this.hideBest();
             }}/>
             <Text
               style={{flex: 1}}>{this.state.waist} cm</Text>
@@ -395,12 +410,15 @@ export default class FindSizeView extends React.Component {
             style={sliderStyles.container}
             trackStyle={sliderStyles.track}
             thumbStyle={sliderStyles.thumb}
-            onSlidingComplete = {(val) => {this.slidingHipComplete(val)}}
-            onSlidingStart = {(val) => {this.slidingStart()} }
+            onSlidingComplete = {(val) =>
+              {
+                this.slidingHipComplete(val);
+                this.showBest();
+              }
+            }
             onValueChange = {(val) => {
-              this.slidingStart();
               this.setState({hip: val});
-              this.searching();
+              this.hideBest();
             }}/>
             <Text
               style={{flex: 1}}>{this.state.hip} cm</Text>
@@ -417,16 +435,67 @@ export default class FindSizeView extends React.Component {
             style={sliderStyles.container}
             trackStyle={sliderStyles.track}
             thumbStyle={sliderStyles.thumb}
-            onSlidingComplete = {(val) => {this.slidingHeightComplete(val)}}
-            onSlidingStart = {(val) => {this.slidingStart()} }
+            onSlidingComplete = {(val) =>
+              {
+                this.slidingHeightComplete(val);
+                this.showBest();
+              }
+            }
             onValueChange = {(val) => {
-              this.slidingStart();
               this.setState({height: val});
-              this.searching();
+              this.hideBest();
             }}/>
             <Text
               style={{flex: 1}}>{this.state.height} cm</Text>
-        </View>      
+        </View>
+        <View style={{
+            flex: 1,
+            margin: 12,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+          <Picker
+            selectedValue={this.state.selectionBrand}
+            onValueChange={(itemValue, itemIndex) => {
+                this.updateSelectionBrand(itemValue);
+              }
+            }
+            style={{width: "50%"}}>
+            <Picker.Item label="All Sizes" value="ALL" />
+            <Picker.Item label="Uhlmann" value="UHLMANN" />
+            <Picker.Item label="Allstar" value="ALLSTAR" />
+            <Picker.Item label="Negrini" value="NEGRINI" />
+            <Picker.Item label="Pbt" value="PBT" />
+          </Picker>
+        </View>
+
+        <View style={{
+              flex: 1,
+              alignItems: 'center',
+              margin: 12,
+              justifyContent: 'center'
+            }}>
+            <Button
+              small
+              raised
+              borderRadius = {3}
+              title='More Sizes'
+              onPress={(val) => {
+                navigate(
+                  'ExploreSizeView',
+                   {
+                     size: {
+                       chest: this.state.chest,
+                       waist: this.state.waist,
+                       hip: this.state.hip,
+                       height: this.state.height
+                     },
+                     fitResultArray: this.state.fitResultArray,
+                   }
+                );
+              }
+            }/>
+        </View>
       </View>
     </View>);
   }

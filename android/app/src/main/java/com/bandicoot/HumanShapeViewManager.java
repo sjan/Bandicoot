@@ -9,7 +9,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
  * Created by Stephen on 11/5/2017.
  */
 
-public class HumanShapeViewManager extends SimpleViewManager<HumanView> {
+public class  HumanShapeViewManager extends SimpleViewManager<HumanView> {
     public static final String REACT_CLASS = "HumanShapeImageView";
     private static final String TAG = HumanShapeViewManager.class.getSimpleName();
 
