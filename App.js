@@ -58,8 +58,9 @@ const FencingFitApp  = StackNavigator(
     }
   },
   {
-      transitionConfig: TransitionConfiguration,
-  });
+    transitionConfig: TransitionConfiguration,
+  }
+);
 
 export default class App extends React.Component {
   render() {

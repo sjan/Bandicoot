@@ -17,11 +17,11 @@ import Util from './Util';
 const PARAMETERS = {
   LABEL_HEIGHT: 120,
   LABEL_HEIGHT_HIDE: 20,
+  LABEL_ELEVATION: 5,
+  LABEL_ANIMATION_TENSION: 20,
   INITIAL_SELECTION_BRAND: 'ALL',
   INITIAL_SELECTION_TYPE: 'MEN',
   INITIAL_SELECTION_MEASUREMENT: 'METRIC',
-  LABEL_ELEVATION: 5,
-  ANIMATION_TENSION: 20
 }
 
 const CHEST_PARAMETERS = {
@@ -118,7 +118,6 @@ export default class FindSizeView extends React.Component {
 
     this.state = {
       sizeData: this.props.screenProps.sizeData,
-
       type: PARAMETERS.INITIAL_SELECTION_TYPE,
       chest: CHEST_PARAMETERS.default,
       waist: WAIST_PARAMETERS.default,
@@ -138,10 +137,6 @@ export default class FindSizeView extends React.Component {
       bestFitHeightDelta: sizeResult.bestFitHeightDelta,
       selectionBrand: PARAMETERS.INITIAL_SELECTION_BRAND,
     };
-  }
-
-  searching() {
-    console.log("searching");
   }
 
   slidingChestComplete(itemSelected) {
@@ -223,7 +218,7 @@ export default class FindSizeView extends React.Component {
     Animated.spring(
       this.state.labelHeight, {
       toValue: PARAMETERS.LABEL_HEIGHT,
-      tension: PARAMETERS.ANIMATION_TENSION
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION
     }).start();
   }
 
@@ -231,7 +226,7 @@ export default class FindSizeView extends React.Component {
     Animated.spring(
       this.state.labelHeight, {
       toValue: PARAMETERS.LABEL_HEIGHT_HIDE,
-      tension: PARAMETERS.ANIMATION_TENSION
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION
     }).start();
   }
 
@@ -289,7 +284,11 @@ export default class FindSizeView extends React.Component {
     let {
       labelElevation,
       labelHeight,
-      labelOpacity
+      labelOpacity,
+      chest,
+      waist,
+      hip,
+      height
     } = this.state;
 
     const { navigate } = this.props.navigation;
@@ -307,12 +306,12 @@ export default class FindSizeView extends React.Component {
         style={{flex: 6}}>
         <HumanImageView
           nativeID={"human-view"}
-          chestSize={this.state.chest}
-          waistSize={this.state.waist}
-          hipSize={this.state.hip}
-          fullHeight={this.state.height}
-          style={{
-            width: '100%',
+          chestSize={chest}
+          waistSize={waist}
+          hipSize={hip}
+          fullHeight={height}
+          style={
+          { width: '100%',
             height: '100%',
             backgroundColor: 'skyblue'
           }}/>
@@ -320,9 +319,9 @@ export default class FindSizeView extends React.Component {
         <Animated.View
           style={[
             {
-              elevation: this.state.labelElevation,
+              elevation: labelElevation,
               height: labelHeight,
-              opacity: this.state.labelOpacity,
+              opacity: labelOpacity,
               flexDirection: 'column',
             },
             styles.label_container
@@ -485,10 +484,10 @@ export default class FindSizeView extends React.Component {
                   'ExploreSizeView',
                    {
                      size: {
-                       chest: this.state.chest,
-                       waist: this.state.waist,
-                       hip: this.state.hip,
-                       height: this.state.height
+                       chest: chest,
+                       waist: waist,
+                       hip: hip,
+                       height: height
                      },
                      fitResultArray: this.state.fitResultArray,
                    }

@@ -23,14 +23,14 @@ class Util {
     var ret = new Object();
     var fitArray = [];
     var bestFitSize = {
-        fitDelta: 100
+        maxDelta: 100
     };
 
     //iterate therough brands
     for (var brand in sizeData) {
       var brandArray = [];
       var bestBrandFitSize = {
-          fitDelta: 100
+          maxDelta: 100
       };
 
       if (sizeData.hasOwnProperty(brand)) {
@@ -48,26 +48,16 @@ class Util {
           waistFit = Util.fit(waistRange, waist);
           hipFit = Util.fit(hipRange, hip);
 
-          fitDelta = Math.abs(chestFit) +
-                    Math.abs(heightFit) +
-                    Math.abs(waistFit) +
-                    Math.abs(hipFit);
+          maxDelta = Math.max(
+             Math.abs(chestFit),
+              Math.abs(heightFit),
+              Math.abs(waistFit),
+              Math.abs(hipFit));
 
           if(selectionBrand == "ALL" || selectionBrand == brand) {
-              if (fitDelta <= bestFitSize.fitDelta) {
-                    console.log("best fit brand " + brand);
-                    bestFitSize.brand = brand;
-                    bestFitSize.fitDelta = fitDelta;
-                    bestFitSize.size = sizeObject.size
-                    bestFitSize.bestFitChestDelta = chestFit;
-                    bestFitSize.bestFitHipDelta = hipFit;
-                    bestFitSize.bestFitWaistDelta = waistFit;
-                    bestFitSize.bestFitHeightDelta = heightFit;
-                }
-
-                if (fitDelta <= bestBrandFitSize.fitDelta) {
+                if (maxDelta <= bestBrandFitSize.maxDelta) {
                       bestBrandFitSize.brand = brand;
-                      bestBrandFitSize.fitDelta = fitDelta;
+                      bestBrandFitSize.maxDelta = maxDelta;
                       bestBrandFitSize.size = sizeObject.size
                       bestBrandFitSize.bestFitChestDelta = chestFit;
                       bestBrandFitSize.bestFitHipDelta = hipFit;
@@ -77,7 +67,7 @@ class Util {
 
                 brandArray.push(
                   {
-                    delta: fitDelta,
+                    delta: maxDelta,
                     brand: brand,
                     size: sizeObject.size,
                     chest: {
@@ -106,15 +96,26 @@ class Util {
         return a.size - b.size;
       });
 
+      //set brand fit size
+      if (maxDelta <= bestFitSize.maxDelta) {
+            bestFitSize.brand = bestBrandFitSize.brand;
+            bestFitSize.maxDelta = bestBrandFitSize.maxDelta;
+            bestFitSize.size = bestBrandFitSize.size
+            bestFitSize.bestFitChestDelta = bestBrandFitSize.bestFitChestDelta;
+            bestFitSize.bestFitHipDelta = bestBrandFitSize.bestFitHipDelta;
+            bestFitSize.bestFitWaistDelta = bestBrandFitSize.bestFitWaistDelta;
+            bestFitSize.bestFitHeightDelta = bestBrandFitSize.bestFitHeightDelta;
+      }
+
       fitArray.push({
         brand: brand,
         bestFit: bestBrandFitSize,
-        fit: brandArray        
+        fit: brandArray
       });
     }
 
     ret.fitArray = fitArray;
-    ret.bestFitDelta = bestFitSize.fitDelta;
+    ret.bestFitDelta = bestFitSize.maxDelta;
     ret.bestFitBrand = bestFitSize.brand;
     ret.bestFitSize = bestFitSize.size;
     ret.bestFitChestDelta = bestFitSize.bestFitChestDelta;

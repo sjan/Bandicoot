@@ -7,7 +7,7 @@ import {
 
 import { Button, ListItem, Icon } from 'react-native-elements';
 
-export default class SizeListItem extends View {
+export default class SizeListItem extends React.Component {
 
   constructor(props) {
     super(props);
@@ -59,8 +59,8 @@ export default class SizeListItem extends View {
                 alignItems: 'center',
               }}>
               <Text style={{
-                flex: 1,
-                fontSize: 16}}
+                flex: 2,
+                fontSize: 14}}
                 >{this.props.label}
               </Text>
               {this.fitIcon(this.props.chestFit)}
@@ -80,9 +80,9 @@ export default class SizeListItem extends View {
       if(fit == 0) {
         icon = 'done';
       } else if(fit < 0) {
-        icon = 'arrow-downward';
+        icon = null;
       } else if (fit > 0) {
-        icon = 'arrow-upward';
+        icon = null;
       }
 
       if(Math.abs(fit) == 0) {
@@ -98,13 +98,42 @@ export default class SizeListItem extends View {
       }
 
     return (
-      <Icon
-        style={{
-          flex: 2,
-        }}
-        reverse
-        name={icon}
-        color={color} />
+      <View style={{
+        justifyContent: 'center',
+        alignItems: 'center',
+        flex:1
+      }}>
+        <Icon
+          style={{
+            flex: 2,
+          }}
+          reverse
+          name={icon}
+          color={color} >
+          </Icon>
+          <Text
+            style={{
+              fontSize: 18,
+              color: 'white',
+              position: 'absolute',
+              textAlign: 'center',
+            }}>
+            {this.formatFit(fit)}
+          </Text>
+
+
+        </View>
       );
+    }
+
+    formatFit(fit) {
+      if(fit == 0) {
+        return "";
+      } else if(fit>0) {
+        return ("+"+fit);
+      } else {
+        return (fit);
+      }
+
     }
 }

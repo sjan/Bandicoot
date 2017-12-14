@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, List, ListItem, Icon, Button  } from 'react-native-elements';
 import { View, ScrollView, FlatList, StyleSheet } from 'react-native';
+import SizeListItem from './SizeListItem';
 
 export default class FindSizeView extends React.Component {
   static navigationOptions = {
@@ -154,32 +155,8 @@ disableBrand(brand) {
                   {brandItem.brand}
                 </Text>
               </View>
-              <View style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  height: 48
-                }}>
-                  <Text style={{
-                    marginLeft: 16,
-                    flex: 2
-                  }}>
-                    Size
-                  </Text>
-                  <Text style={{
-                    flex: 1,
-                  }}>Chest</Text>
-                  <Text style={{
-                    flex: 1,
-                  }}>Waist</Text>
-                  <Text style={{
-                    flex: 1,
-                  }}>Hip</Text>
-                  <Text style={{
-                    flex: 1,
-                  }}>Height</Text>
-                </View>
-
-                <List>
+              <SizeListItem header='true'/>
+              <List>
                   {
                     brandItem.fit.filter(function(sizeData) {
                       if(!showAll[brandItem.brand]) {
@@ -195,29 +172,14 @@ disableBrand(brand) {
                       }
                     }).map(
                       (sizeItem, j) => (
-                      <ListItem
-                        key={j}
-                        hideChevron={true}
-                        style={{
-                          underlayColor: 'blue',
-                          height: 12
-                        }}
-                        title={
-                          <View style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                          }}>
-                          <Text style={{
-                            flex: 1,
-                            fontSize: 24}}
-                            >{sizeItem.size}
-                          </Text>
-                          {this.fitIcon(sizeItem.chest.fit)}
-                          {this.fitIcon(sizeItem.waist.fit)}
-                          {this.fitIcon(sizeItem.hip.fit)}
-                          {this.fitIcon(sizeItem.height.fit)}
-                          </View>
-                        }/>
+                        <SizeListItem
+                          key= {j}
+                          chestFit = {sizeItem.chest.fit}
+                          waistFit = {sizeItem.waist.fit}
+                          hipFit = {sizeItem.hip.fit}
+                          heightFit = {sizeItem.height.fit}
+                          label = {sizeItem.brand + " " + sizeItem.size}>
+                        </SizeListItem>
                     ))
                   }
                 </List>
