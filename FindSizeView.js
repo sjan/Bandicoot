@@ -9,7 +9,9 @@ import {
   Text
 } from 'react-native';
 
+import Animation from 'lottie-react-native';
 import { Button } from 'react-native-elements';
+
 import HumanImageView from './HumanView';
 import SizeListItem from './SizeListItem';
 import Util from './Util';
@@ -19,6 +21,9 @@ const PARAMETERS = {
   LABEL_HEIGHT_HIDE: 20,
   LABEL_ELEVATION: 5,
   LABEL_ANIMATION_TENSION: 20,
+
+  TEST_ANIMATION_TENSION: 1,
+
   INITIAL_SELECTION_BRAND: 'ALL',
   INITIAL_SELECTION_TYPE: 'MEN',
   INITIAL_SELECTION_MEASUREMENT: 'METRIC',
@@ -63,9 +68,9 @@ const styles = StyleSheet.create({
   label_container: {
     position: 'absolute',
     top: -20,
-    left: '2%',
-    right: '2%',
-    width: '96%',
+    left: '0%',
+    right: '0%',
+    width: '100%',
     backgroundColor: 'white'
   },
   size_label_text: {
@@ -126,6 +131,7 @@ export default class FindSizeView extends React.Component {
 
       labelElevation: new Animated.Value(PARAMETERS.LABEL_ELEVATION),
       labelHeight: new Animated.Value(PARAMETERS.LABEL_HEIGHT),
+      labelTransformation: new Animated.Value(0),
       labelOpacity: new Animated.Value(1),
 
       fitResultArray: sizeResult.fitArray,
@@ -136,6 +142,8 @@ export default class FindSizeView extends React.Component {
       bestFitHipDelta: sizeResult.bestFitHipDelta,
       bestFitHeightDelta: sizeResult.bestFitHeightDelta,
       selectionBrand: PARAMETERS.INITIAL_SELECTION_BRAND,
+
+      animationProgress: new Animated.Value(0),
     };
   }
 
@@ -216,18 +224,33 @@ export default class FindSizeView extends React.Component {
 
   showBest() {
     Animated.spring(
-      this.state.labelHeight, {
-      toValue: PARAMETERS.LABEL_HEIGHT,
+      this.state.labelTransformation, {
+      toValue: 0,
       tension: PARAMETERS.LABEL_ANIMATION_TENSION
+    }).start();
+
+    Animated.spring(
+      this.state.animationProgress,
+    {
+      toValue: 0,
+      tension: PARAMETERS.TEST_ANIMATION_TENSION
     }).start();
   }
 
   hideBest() {
     Animated.spring(
-      this.state.labelHeight, {
-      toValue: PARAMETERS.LABEL_HEIGHT_HIDE,
-      tension: PARAMETERS.LABEL_ANIMATION_TENSION
-    }).start();
+      this.state.labelTransformation,
+      {
+        toValue: 1,
+        tension: PARAMETERS.LABEL_ANIMATION_TENSION
+      }).start();
+
+    Animated.spring(
+      this.state.animationProgress,
+      {
+        toValue: 1,
+        tension: PARAMETERS.TEST_ANIMATION_TENSION
+      }).start();
   }
 
   updateSelectionBrand(selectionBrand) {
@@ -303,19 +326,19 @@ export default class FindSizeView extends React.Component {
         }}>
       <View
         nativeID={"display-container"}
-        style={{flex: 6}}>
-        <HumanImageView
-          nativeID={"human-view"}
-          chestSize={chest}
-          waistSize={waist}
-          hipSize={hip}
-          fullHeight={height}
-          style={
-          { width: '100%',
-            height: '100%',
-            backgroundColor: 'skyblue'
-          }}/>
-        </View>
+        style={{flex: 6,alignItems: 'center',}}>
+        <Animation
+         style={{
+           position: 'absolute',
+           backgroundColor: 'blue',
+           top: 100,
+           width: 200,
+           height: 200,
+         }}
+       source={require('./resources/animation.json')}
+       progress={this.state.animationProgress}
+      />
+      </View>
         <Animated.View
           style={[
             {
@@ -323,6 +346,12 @@ export default class FindSizeView extends React.Component {
               height: labelHeight,
               opacity: labelOpacity,
               flexDirection: 'column',
+              transform: [{
+                 translateY: this.state.labelTransformation.interpolate({
+                   inputRange: [0, 1],
+                   outputRange: [0, -100]
+                 }),
+               }],
             },
             styles.label_container
           ]}>
@@ -367,6 +396,7 @@ export default class FindSizeView extends React.Component {
           }
           onValueChange = {(val) => {
             this.setState({chest: val});
+
             this.hideBest();
           }}/>
           <Text
