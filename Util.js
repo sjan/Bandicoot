@@ -1,6 +1,34 @@
 class Util {
   constructor() {}
 
+  static measurment(value, unit) {
+    if(unit == 'METRIC') {
+      return (
+        {
+          cmValue: value,
+          inValue: Util.convertToInches(value)
+        });
+    } else {
+      return (
+        {
+          cmValue: Util.convertToCentimeters(value),
+          inValue: value
+        });
+    }
+  }
+
+  static convertToInches(value) {
+    actualValue = value*(0.393701);
+    estimatedValue = Math.round(actualValue * 4);
+    return estimatedValue/4.0;
+  }
+
+  static convertToCentimeters(value) {
+    actualValue = 2.54*value;
+
+    return Math.round(actualValue);
+  }
+
   static inRange(range, size) {
     if (size >= range.lower && size <= range.upper) {
       return true;
@@ -43,10 +71,10 @@ class Util {
           waistRange = sizeObject.waist;
           hipRange = sizeObject.hip;
 
-          chestFit = Util.fit(chestRange, chest);
-          heightFit = Util.fit(heightRange, height);
-          waistFit = Util.fit(waistRange, waist);
-          hipFit = Util.fit(hipRange, hip);
+          chestFit = Util.fit(chestRange, chest.cmValue);
+          heightFit = Util.fit(heightRange, height.cmValue);
+          waistFit = Util.fit(waistRange, waist.cmValue);
+          hipFit = Util.fit(hipRange, hip.cmValue);
 
           maxDelta = Math.max(
              Math.abs(chestFit),

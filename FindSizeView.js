@@ -30,31 +30,63 @@ const PARAMETERS = {
 }
 
 const CHEST_PARAMETERS = {
-  min: 62,
-  max: 125,
-  step: 1,
-  default: 96
+  min: {
+    cmValue: 62,
+    inValue: Util.convertToInches(62)
+  },
+  max: {
+    cmValue: 125,
+    inValue: Util.convertToInches(125)
+  },
+  default: {
+    cmValue: 96,
+    inValue: Util.convertToInches(96)
+  }
 }
 
 const WAIST_PARAMETERS = {
-  min: 55,
-  max: 110,
-  step: 1,
-  default: 88
+  min: {
+    cmValue: 55,
+    inValue: Util.convertToInches(55)
+  },
+  max: {
+    cmValue: 110,
+    inValue: Util.convertToInches(110)
+  },
+  default: {
+    cmValue: 88,
+    inValue: Util.convertToInches(88)
+  }
 }
 
 const HIP_PARAMETERS = {
-  min: 65,
-  max: 127,
-  step: 1,
-  default: 104
+  min: {
+    cmValue: 65,
+    inValue: Util.convertToInches(65)
+  },
+  max: {
+    cmValue: 127,
+    inValue: Util.convertToInches(127)
+  },
+  default: {
+    cmValue: 104,
+    inValue: Util.convertToInches(104)
+  }
 }
 
 const HEIGHT_PARAMETERS = {
-  min: 120,
-  max: 200,
-  step: 1,
-  default: 176
+  min: {
+    cmValue: 120,
+    inValue: Util.convertToInches(120)
+  },
+  max: {
+    cmValue: 200,
+    inValue: Util.convertToInches(200)
+  },
+  default: {
+    cmValue: 176,
+    inValue: Util.convertToInches(176)
+  }
 }
 
 const styles = StyleSheet.create({
@@ -142,6 +174,7 @@ export default class FindSizeView extends React.Component {
       bestFitHipDelta: sizeResult.bestFitHipDelta,
       bestFitHeightDelta: sizeResult.bestFitHeightDelta,
       selectionBrand: PARAMETERS.INITIAL_SELECTION_BRAND,
+      selectionUnit: PARAMETERS.INITIAL_SELECTION_MEASUREMENT,
 
       animationProgress: new Animated.Value(0),
     };
@@ -222,6 +255,22 @@ export default class FindSizeView extends React.Component {
     );
   }
 
+  unitDisplay(value) {
+    if(this.state.selectionUnit == 'METRIC') {
+      return value.cmValue + ' cm'
+    } else {
+      return value.inValue + ' in'
+    }
+  }
+
+  unitStep() {
+    if(this.state.selectionUnit == 'METRIC') {
+      return 1
+    } else {
+      return .25
+    }
+  }
+
   showBest() {
     Animated.spring(
       this.state.labelTransformation, {
@@ -251,6 +300,14 @@ export default class FindSizeView extends React.Component {
         toValue: 1,
         tension: PARAMETERS.TEST_ANIMATION_TENSION
       }).start();
+  }
+
+  convertToUnit(value, unit) {
+    if(unit == 'METRIC') {
+      return value;
+    } else {
+      return value*(0.393701);
+    }
   }
 
   updateSelectionBrand(selectionBrand) {
@@ -301,6 +358,23 @@ export default class FindSizeView extends React.Component {
         bestFitHeightDelta: sizeResult.bestFitHeightDelta,
       }
     );
+  }
+
+  updateSelectionUnit(unit) {
+    console.log("setting unit "  + unit);
+    this.setState(
+      {
+        selectionUnit: unit,
+      }
+    );
+  }
+
+  displayValue(value) {
+    if (this.state.selectionUnit == 'METRIC') {
+      return value.cmValue;
+    } else {
+      return value.inValue;
+    }
   }
 
   render() {
@@ -377,112 +451,14 @@ export default class FindSizeView extends React.Component {
               style={{fontSize: 20}}
               > Set Your Dimensions </Text>
         </View>
-        <View style={styles.slider_controller_container}>
-          <Text
-            style={{flex: 1}}>Chest </Text>
-        <Slider
-          value={CHEST_PARAMETERS.default}
-          step={CHEST_PARAMETERS.step}
-          maximumValue={CHEST_PARAMETERS.max}
-          minimumValue={CHEST_PARAMETERS.min}
-          style={sliderStyles.container}
-          trackStyle={sliderStyles.track}
-          thumbStyle={sliderStyles.thumb}
-          onSlidingComplete = {(val) =>
-            {
-              this.slidingChestComplete(val);
-              this.showBest();
-            }
-          }
-          onValueChange = {(val) => {
-            this.setState({chest: val});
-
-            this.hideBest();
-          }}/>
-          <Text
-            style={{flex: 1}}>{this.state.chest} cm</Text>
-        </View>
-
-        <View style={styles.slider_controller_container}>
-          <Text
-            style={{flex: 1}}>Waist </Text>
-          <Slider
-            value={WAIST_PARAMETERS.default}
-            maximumValue={WAIST_PARAMETERS.max}
-            minimumValue={WAIST_PARAMETERS.min}
-            step={WAIST_PARAMETERS.step}
-            style={sliderStyles.container}
-            trackStyle={sliderStyles.track}
-            thumbStyle={sliderStyles.thumb}
-            onSlidingComplete = {(val) =>
-              {
-                this.slidingWaistComplete(val);
-                this.showBest();
-              }
-            }
-            onValueChange = {(val) => {
-              this.setState({waist: val});
-              this.hideBest();
-            }}/>
-            <Text
-              style={{flex: 1}}>{this.state.waist} cm</Text>
-        </View>
-
-        <View style={styles.slider_controller_container}>
-          <Text
-            style={{flex: 1}}>Hip </Text>
-          <Slider
-            value={HIP_PARAMETERS.default}
-            maximumValue={HIP_PARAMETERS.max}
-            minimumValue={HIP_PARAMETERS.min}
-            step={HIP_PARAMETERS.step}
-            style={sliderStyles.container}
-            trackStyle={sliderStyles.track}
-            thumbStyle={sliderStyles.thumb}
-            onSlidingComplete = {(val) =>
-              {
-                this.slidingHipComplete(val);
-                this.showBest();
-              }
-            }
-            onValueChange = {(val) => {
-              this.setState({hip: val});
-              this.hideBest();
-            }}/>
-            <Text
-              style={{flex: 1}}>{this.state.hip} cm</Text>
-        </View>
-
-        <View style={styles.slider_controller_container}>
-          <Text
-            style={{flex: 1}}>Height </Text>
-          <Slider
-            value={HEIGHT_PARAMETERS.default}
-            maximumValue={HEIGHT_PARAMETERS.max}
-            minimumValue={HEIGHT_PARAMETERS.min}
-            step={HEIGHT_PARAMETERS.step}
-            style={sliderStyles.container}
-            trackStyle={sliderStyles.track}
-            thumbStyle={sliderStyles.thumb}
-            onSlidingComplete = {(val) =>
-              {
-                this.slidingHeightComplete(val);
-                this.showBest();
-              }
-            }
-            onValueChange = {(val) => {
-              this.setState({height: val});
-              this.hideBest();
-            }}/>
-            <Text
-              style={{flex: 1}}>{this.state.height} cm</Text>
-        </View>
         <View style={{
             flex: 1,
             margin: 12,
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            flexDirection: 'row'
           }}>
+
           <Picker
             selectedValue={this.state.selectionBrand}
             onValueChange={(itemValue, itemIndex) => {
@@ -496,7 +472,133 @@ export default class FindSizeView extends React.Component {
             <Picker.Item label="Negrini" value="NEGRINI" />
             <Picker.Item label="Pbt" value="PBT" />
           </Picker>
+          <Picker
+            selectedValue={this.state.selectionUnit}
+            onValueChange={(itemValue, itemIndex) => {
+                this.updateSelectionUnit(itemValue);
+              }
+            }
+            style={{width: "40%"}}>
+            <Picker.Item label="Centimeter" value="METRIC" />
+            <Picker.Item label="Inch" value="STANDARD" />
+          </Picker>
         </View>
+        <View style={styles.slider_controller_container}>
+          <Text
+            style={{flex: 1}}>Chest </Text>
+        <Slider
+          value={this.displayValue(CHEST_PARAMETERS.default)}
+          step={this.unitStep()}
+          maximumValue={this.displayValue(CHEST_PARAMETERS.max)}
+          minimumValue={this.displayValue(CHEST_PARAMETERS.min)}
+          style={sliderStyles.container}
+          trackStyle={sliderStyles.track}
+          thumbStyle={sliderStyles.thumb}
+          onSlidingComplete = {(val) =>
+            {
+              this.slidingChestComplete(Util.measurment(val, this.state.selectionUnit));
+              this.showBest();
+            }
+          }
+          onValueChange = {(val) => {
+            this.setState({chest:
+              Util.measurment(val, this.state.selectionUnit)
+            });
+            this.hideBest();
+          }}/>
+          <Text
+            style={{flex: 2}}>{this.unitDisplay(this.state.chest)}</Text>
+        </View>
+
+        <View style={styles.slider_controller_container}>
+          <Text
+            style={{flex: 1}}>Waist </Text>
+          <Slider
+            value={this.displayValue(WAIST_PARAMETERS.default)}
+            maximumValue={this.displayValue(WAIST_PARAMETERS.max)}
+            minimumValue={this.displayValue(WAIST_PARAMETERS.min)}
+            step={this.unitStep()}
+            style={sliderStyles.container}
+            trackStyle={sliderStyles.track}
+            thumbStyle={sliderStyles.thumb}
+            onSlidingComplete = {(val) =>
+              {
+                this.slidingWaistComplete(Util.measurment(val, this.state.selectionUnit));
+                this.showBest();
+              }
+            }
+            onValueChange = {(val) => {
+              this.setState({waist:
+                Util.measurment(val, this.state.selectionUnit)
+              });
+              this.hideBest();
+            }}/>
+            <Text
+              style={{flex: 2}}>{this.unitDisplay(this.state.waist)}</Text>
+        </View>
+
+        <View style={styles.slider_controller_container}>
+          <Text
+            style={{flex: 1}}>Hip </Text>
+          <Slider
+            value={this.displayValue(HIP_PARAMETERS.default)}
+            maximumValue={this.displayValue(HIP_PARAMETERS.max)}
+            minimumValue={this.displayValue(HIP_PARAMETERS.min)}
+            step={this.unitStep()}
+            style={sliderStyles.container}
+            trackStyle={sliderStyles.track}
+            thumbStyle={sliderStyles.thumb}
+            onSlidingComplete = {(val) =>
+              {
+                this.slidingHipComplete(Util.measurment(val, this.state.selectionUnit));
+                this.showBest();
+              }
+            }
+            onValueChange = {(val) => {
+              this.setState({hip:
+                Util.measurment(val, this.state.selectionUnit)
+              });
+              this.hideBest();
+            }}/>
+            <Text
+              style={{flex: 2}}>{this.unitDisplay(this.state.hip)}</Text>
+        </View>
+
+        <View
+          style={
+            [
+              {
+                marginBottom: 20,
+              },
+              styles.slider_controller_container
+            ]
+          }
+          >
+          <Text
+            style={{flex: 1}}>Height </Text>
+          <Slider
+            value={this.displayValue(HEIGHT_PARAMETERS.default)}
+            maximumValue={this.displayValue(HEIGHT_PARAMETERS.max)}
+            minimumValue={this.displayValue(HEIGHT_PARAMETERS.min)}
+            step={this.unitStep()}
+            style={sliderStyles.container}
+            trackStyle={sliderStyles.track}
+            thumbStyle={sliderStyles.thumb}
+            onSlidingComplete = {(val) =>
+              {
+                this.slidingHeightComplete(Util.measurment(val, this.state.selectionUnit));
+                this.showBest();
+              }
+            }
+            onValueChange = {(val) => {
+              this.setState({height: val});
+              this.hideBest();
+            }}/>
+
+            <Text
+              style={{flex: 2}}>{this.unitDisplay(this.state.height)}</Text>
+        </View>
+
 
         <View style={{
               flex: 1,
