@@ -302,14 +302,6 @@ export default class FindSizeView extends React.Component {
       }).start();
   }
 
-  convertToUnit(value, unit) {
-    if(unit == 'METRIC') {
-      return value;
-    } else {
-      return value*(0.393701);
-    }
-  }
-
   updateSelectionBrand(selectionBrand) {
     var sizeResult = Util.computeSize(
       selectionBrand,
@@ -361,7 +353,6 @@ export default class FindSizeView extends React.Component {
   }
 
   updateSelectionUnit(unit) {
-    console.log("setting unit "  + unit);
     this.setState(
       {
         selectionUnit: unit,
