@@ -9,10 +9,7 @@ import {
   Picker,
   Text
 } from 'react-native';
-import {
-  Button,
-  Icon
-} from 'react-native-elements';
+import {Button, Icon} from 'react-native-elements';
 import Animation from 'lottie-react-native';
 import TopResultView from './TopResultView';
 import Util from './Util';
@@ -38,10 +35,8 @@ const PARAMETERS = {
 
   INITIAL_SELECTION_BRAND: 'ALL',
   INITIAL_SELECTION_TYPE: 'MEN',
-  INITIAL_SELECTION_MEASUREMENT: 'METRIC',
+  INITIAL_SELECTION_MEASUREMENT: 'METRIC'
 }
-
-
 
 const CHEST_PARAMETERS = {
   min: {
@@ -132,7 +127,7 @@ const styles = StyleSheet.create({
   },
   track: {
     height: 2,
-    backgroundColor: '#303030',
+    backgroundColor: '#303030'
   },
   thumb: {
     width: 10,
@@ -141,30 +136,23 @@ const styles = StyleSheet.create({
     borderRadius: 10 / 2,
     shadowColor: '#31a4db',
     shadowOffset: {
-      width: 0, height: 0
+      width: 0,
+      height: 0
     },
     shadowRadius: 2,
-    shadowOpacity: 1,
+    shadowOpacity: 1
   }
 });
 
 export default class FindSizeView extends React.Component {
   static navigationOptions = {
-    title: 'Find Size Search',
+    title: 'Find Size Search'
   };
 
   constructor(props) {
     super(props);
 
-    var sizeResult = Util.computeSize(
-      PARAMETERS.INITIAL_SELECTION_BRAND,
-      PARAMETERS.INITIAL_SELECTION_TYPE,
-      this.props.screenProps.sizeData,
-      CHEST_PARAMETERS.default,
-      HEIGHT_PARAMETERS.default,
-      WAIST_PARAMETERS.default,
-      HIP_PARAMETERS.default
-    );
+    var sizeResult = Util.computeSize(PARAMETERS.INITIAL_SELECTION_BRAND, PARAMETERS.INITIAL_SELECTION_TYPE, this.props.screenProps.sizeData, CHEST_PARAMETERS.default, HEIGHT_PARAMETERS.default, WAIST_PARAMETERS.default, HIP_PARAMETERS.default);
 
     this.state = {
       sizeData: this.props.screenProps.sizeData,
@@ -189,90 +177,60 @@ export default class FindSizeView extends React.Component {
       selectionBrand: PARAMETERS.INITIAL_SELECTION_BRAND,
       selectionUnit: PARAMETERS.INITIAL_SELECTION_MEASUREMENT,
       moreResults: false,
-      animationProgress: new Animated.Value(0),
+      animationProgress: new Animated.Value(0)
     };
 
     this.handleDrag = this.handleDrag.bind(this);
-    this.handleDragRelease = this.handleDragRelease.bind(this);    
+    this.handleDragRelease = this.handleDragRelease.bind(this);
   }
 
   updateChest(chestSize) {
-    var sizeResult = Util.computeSize(
-      this.state.selectionBrand,
-      this.state.type,
-      this.state.sizeData,
-      chestSize,
-      this.state.height,
-      this.state.waist,
-      this.state.hip
-    );
+    var sizeResult = Util.computeSize(this.state.selectionBrand, this.state.type, this.state.sizeData, chestSize, this.state.height, this.state.waist, this.state.hip);
 
-    this.setState(
-      {
-        chest: chestSize,
-        fitResultArray: sizeResult.fitArray,
-        bestFitBrand: sizeResult.bestFitBrand,
-        bestFitSize: sizeResult.bestFitSize,
-        bestFitChestDelta: sizeResult.bestFitChestDelta,
-        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
-        bestFitHipDelta: sizeResult.bestFitHipDelta,
-        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
-      }
-    );
+    this.setState({
+      chest: chestSize,
+      fitResultArray: sizeResult.fitArray,
+      bestFitBrand: sizeResult.bestFitBrand,
+      bestFitSize: sizeResult.bestFitSize,
+      bestFitChestDelta: sizeResult.bestFitChestDelta,
+      bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+      bestFitHipDelta: sizeResult.bestFitHipDelta,
+      bestFitHeightDelta: sizeResult.bestFitHeightDelta
+    });
   }
 
   updateWaist(waistSize) {
-    var sizeResult = Util.computeSize(
-      this.state.selectionBrand,
-      this.state.type,
-      this.state.sizeData,
-      this.state.chest,
-      this.state.height,
-      waistSize,
-      this.state.hip
-    );
+    var sizeResult = Util.computeSize(this.state.selectionBrand, this.state.type, this.state.sizeData, this.state.chest, this.state.height, waistSize, this.state.hip);
 
-    this.setState(
-      {
-        waist: waistSize,
-        fitResultArray: sizeResult.fitArray,
-        bestFitBrand: sizeResult.bestFitBrand,
-        bestFitSize: sizeResult.bestFitSize,
-        bestFitChestDelta: sizeResult.bestFitChestDelta,
-        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
-        bestFitHipDelta: sizeResult.bestFitHipDelta,
-        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
-      }
-    );
+    this.setState({
+      waist: waistSize,
+      fitResultArray: sizeResult.fitArray,
+      bestFitBrand: sizeResult.bestFitBrand,
+      bestFitSize: sizeResult.bestFitSize,
+      bestFitChestDelta: sizeResult.bestFitChestDelta,
+      bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+      bestFitHipDelta: sizeResult.bestFitHipDelta,
+      bestFitHeightDelta: sizeResult.bestFitHeightDelta
+    });
   }
 
   updateHip(hipSize) {
-    var sizeResult = Util.computeSize(
-      this.state.selectionBrand,
-      this.state.type,
-      this.state.sizeData,
-      this.state.chest,
-      this.state.height,
-      this.state.waist,
-      hipSize
-    );
+    var sizeResult = Util.computeSize(this.state.selectionBrand, this.state.type, this.state.sizeData, this.state.chest, this.state.height, this.state.waist, hipSize);
 
-    this.setState(
-      {
-        hip: hipSize,
-        fitResultArray: sizeResult.fitArray,
-        bestFitBrand: sizeResult.bestFitBrand,
-        bestFitSize: sizeResult.bestFitSize,
-        bestFitChestDelta: sizeResult.bestFitChestDelta,
-        bestFitWaistDelta: sizeResult.bestFitWaistDelta,
-        bestFitHipDelta: sizeResult.bestFitHipDelta,
-        bestFitHeightDelta: sizeResult.bestFitHeightDelta,
-      }
-    );
+    this.setState({
+      hip: hipSize,
+      fitResultArray: sizeResult.fitArray,
+      bestFitBrand: sizeResult.bestFitBrand,
+      bestFitSize: sizeResult.bestFitSize,
+      bestFitChestDelta: sizeResult.bestFitChestDelta,
+      bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+      bestFitHipDelta: sizeResult.bestFitHipDelta,
+      bestFitHeightDelta: sizeResult.bestFitHeightDelta
+    });
   }
 
   unitDisplay(value) {
-    if(this.state.selectionUnit == 'METRIC') {
+    if (this.state.selectionUnit == 'METRIC') {
       return value.cmValue + ' cm'
     } else {
       return value.inValue + ' in'
@@ -280,7 +238,7 @@ export default class FindSizeView extends React.Component {
   }
 
   unitStep() {
-    if(this.state.selectionUnit == 'METRIC') {
+    if (this.state.selectionUnit == 'METRIC') {
       return 1
     } else {
       return .25
@@ -288,52 +246,49 @@ export default class FindSizeView extends React.Component {
   }
 
   showBest() {
-    Animated.spring(
-      this.state.labelTransformation, {
+    Animated.spring(this.state.labelTransformation, {
       toValue: 0,
       tension: PARAMETERS.LABEL_ANIMATION_TENSION
     }).start();
 
-    Animated.spring(
-      this.state.animationProgress,
-    {
+    Animated.spring(this.state.animationProgress, {
       toValue: 0,
       tension: PARAMETERS.TEST_ANIMATION_TENSION
     }).start();
   }
 
   hideBest() {
-    Animated.spring(
-      this.state.labelTransformation,
-      {
-        toValue: 1,
-        tension: PARAMETERS.LABEL_ANIMATION_TENSION
-      }).start();
+    Animated.spring(this.state.labelHeight, {
+      toValue: PARAMETERS.LABEL_HEIGHT,
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION
+    }).start();
 
-    Animated.spring(
-      this.state.animationProgress,
-      {
-        toValue: 1,
-        tension: PARAMETERS.TEST_ANIMATION_TENSION
-      }).start();
+    Animated.spring(this.state.labelTransformation, {
+      toValue: 1,
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION
+    }).start();
+
+    Animated.spring(this.state.animationProgress, {
+      toValue: 1,
+      tension: PARAMETERS.TEST_ANIMATION_TENSION
+    }).start();
   }
 
-  sum(a, b){
-    return a+b;
+  sum(a, b) {
+    return a + b;
   }
 
   handleDrag(e, gestureState) {
-    console.log("delta y" + gestureState.dy + " new height: " + this.sum(PARAMETERS.LABEL_HEIGHT,gestureState.dy));
+    console.log("delta y" + gestureState.dy + " new height: " + this.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy));
     this.setState({
-        labelHeight: new Animated.Value(this.sum(PARAMETERS.LABEL_HEIGHT,gestureState.dy))
-      }
-    )
+      labelHeight: new Animated.Value(this.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy))
+    })
   }
 
   handleDragRelease(e, gestureState) {
     var newHeight;
     var moreResult;
-    if(this.state.labelHeight._value > PARAMETERS.ANCHOR_PONT) {
+    if (this.state.labelHeight._value > PARAMETERS.ANCHOR_PONT) {
       newHeight = PARAMETERS.LABEL_HEIGHT_EXPANDED;
       moreResult = true;
     } else {
@@ -343,8 +298,7 @@ export default class FindSizeView extends React.Component {
 
     this.setState({moreResults: moreResult});
 
-    Animated.spring(
-      this.state.labelHeight, {
+    Animated.spring(this.state.labelHeight, {
       toValue: newHeight,
       tension: PARAMETERS.LABEL_ANIMATION_TENSION,
       friction: PARAMETERS.LABEL_ANIMATION_FRICTION
@@ -360,7 +314,7 @@ export default class FindSizeView extends React.Component {
   }
 
   getArrowIcon() {
-    if(this.state.moreResults) {
+    if (this.state.moreResults) {
       return 'arrow-up'
     } else {
       return 'arrow-down'
@@ -378,76 +332,57 @@ export default class FindSizeView extends React.Component {
       height
     } = this.state;
 
-    const { navigate } = this.props.navigation;
+    const {navigate} = this.props.navigation;
 
-    return (
-      <View
-        nativeID={"root-container"}
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-          marginBottom: 24
+    return (<View nativeID={"root-container"} style={{
+        flex: 1,
+        flexDirection: 'column',
+        marginBottom: 24
+      }}>
+      <View nativeID={"display-container"} style={{
+          flex: 6,
+          alignItems: 'center'
         }}>
-      <View
-        nativeID={"display-container"}
-        style={{flex: 6,alignItems: 'center',}}>
-        <Animation
-         style={{
-           position: 'absolute',
-           backgroundColor: 'blue',
-           top: 100,
-           width: 200,
-           height: 200,
-         }}
-       source={require('./resources/animation.json')}
-       progress={this.state.animationProgress}
-      />
+        <Animation style={{
+            position: 'absolute',
+            backgroundColor: 'blue',
+            top: 100,
+            width: 200,
+            height: 200
+          }} source={require('./resources/animation.json')} progress={this.state.animationProgress}/>
       </View>
-        <Animated.View
-          style={[
-            {
-              elevation: labelElevation,
-              height: labelHeight,
-              opacity: labelOpacity,
-              transform: [{
-                 translateY: this.state.labelTransformation.interpolate({
-                   inputRange: [0, 1],
-                   outputRange: [0, PARAMETERS.LABEL_DISPLACEMENT]
-                 }),
-               }],
-            },
-            styles.label_container
-          ]}>
-          <TopResultView
-            bestFitChestDelta = {this.state.bestFitChestDelta}
-            bestFitWaistDelta = {this.state.bestFitWaistDelta}
-            bestFitHipDelta = {this.state.bestFitHipDelta}
-            bestFitHeightDelta = {this.state.bestFitHeightDelta}
-            bestFitBrand = {this.state.bestFitBrand}
-            bestFitSize = {this.state.bestFitSize}
-            brandSelection = {this.state.selectionBrand}
-            handleDrag={this.handleDrag}
-            handleDragRelease={this.handleDragRelease}
-            />
-            <View
-              style={{
-                  position: 'absolute',
-                  width: 30,
-                  height: 30,
-                  bottom: 0,
-                  right: 0,
-               }}
-               >
-                 <Icon
-                   type='simple-line-icon'
-                   name= {this.getArrowIcon()}
-                   onPress={() => {
-                     console.log("click")
-                   }}
-                 />
-            </View>
+      <Animated.View style={[
+          {
+            elevation: labelElevation,
+            height: labelHeight,
+            opacity: labelOpacity,
+            transform: [
+              {
+                translateY: this.state.labelTransformation.interpolate({
+                  inputRange: [
+                    0, 1
+                  ],
+                  outputRange: [0, PARAMETERS.LABEL_DISPLACEMENT]
+                })
+              }
+            ]
+          },
+          styles.label_container
+        ]}>
+        <TopResultView bestFitChestDelta={this.state.bestFitChestDelta} bestFitWaistDelta={this.state.bestFitWaistDelta} bestFitHipDelta={this.state.bestFitHipDelta} bestFitHeightDelta={this.state.bestFitHeightDelta} bestFitBrand={this.state.bestFitBrand} bestFitSize={this.state.bestFitSize} brandSelection={this.state.selectionBrand} handleDrag={this.handleDrag} handleDragRelease={this.handleDragRelease}/>
+        <View style={{
+            position: 'absolute',
+            width: 30,
+            height: 30,
+            bottom: 0,
+            right: 0
+          }}>
+          <Icon type='simple-line-icon' name={this.getArrowIcon()} onPress={() => {
+              console.log("click")
+            }}/>
+        </View>
 
-        </Animated.View>
+      </Animated.View>
       <View style={styles.controller_container}>
         <View style={{
             flex: 1,
@@ -456,7 +391,11 @@ export default class FindSizeView extends React.Component {
             marginLeft: 32,
             marginRight: 32
           }}>
-          <Text style={{fontSize: 20}}> Set Your Dimensions </Text>
+          <Text style={{
+              fontSize: 20
+            }}>
+            Set Your Dimensions
+          </Text>
         </View>
         <View style={{
             flex: 1,
@@ -465,144 +404,115 @@ export default class FindSizeView extends React.Component {
             justifyContent: 'center',
             flexDirection: 'row'
           }}>
-          <Picker
-            selectedValue={this.state.selectionBrand}
-            onValueChange={(itemValue, itemIndex) => {
-                this.updateSelectionBrand(itemValue);
-              }
+          <Picker selectedValue={this.state.selectionBrand} onValueChange={(itemValue, itemIndex) => {
+              this.updateSelectionBrand(itemValue);
             }
-            style={{width: "50%"}}>
-            <Picker.Item label="All Brands" value="ALL" />
-            <Picker.Item label="Uhlmann" value="UHLMANN" />
-            <Picker.Item label="Allstar" value="ALLSTAR" />
-            <Picker.Item label="Negrini" value="NEGRINI" />
-            <Picker.Item label="Pbt" value="PBT" />
+} style={{
+              width: "50%"
+            }}>
+            <Picker.Item label="All Brands" value="ALL"/>
+            <Picker.Item label="Uhlmann" value="UHLMANN"/>
+            <Picker.Item label="Allstar" value="ALLSTAR"/>
+            <Picker.Item label="Negrini" value="NEGRINI"/>
+            <Picker.Item label="Pbt" value="PBT"/>
           </Picker>
-          <Picker
-            selectedValue={this.state.selectionUnit}
-            onValueChange={(itemValue, itemIndex) => {
-                this.updateSelectionUnit(itemValue);
-              }
+          <Picker selectedValue={this.state.selectionUnit} onValueChange={(itemValue, itemIndex) => {
+              this.updateSelectionUnit(itemValue);
             }
-            style={{width: "40%"}}>
-            <Picker.Item label="Centimeter" value="METRIC" />
-            <Picker.Item label="Inch" value="STANDARD" />
+} style={{
+              width: "40%"
+            }}>
+            <Picker.Item label="Centimeter" value="METRIC"/>
+            <Picker.Item label="Inch" value="STANDARD"/>
           </Picker>
         </View>
         <View style={styles.slider_controller_container}>
-          <Text
-            style={{flex: 1}}>Chest </Text>
-        <Slider
-          value={this.displayValue(CHEST_PARAMETERS.default)}
-          step={this.unitStep()}
-          maximumValue={this.displayValue(CHEST_PARAMETERS.max)}
-          minimumValue={this.displayValue(CHEST_PARAMETERS.min)}
-          style={styles.slider_container}
-          trackStyle={styles.track}
-          thumbStyle={styles.thumb}
-          onSlidingComplete = {(val) =>
+          <Text style={{
+              flex: 1
+            }}>Chest
+          </Text>
+          <Slider value={this.displayValue(CHEST_PARAMETERS.default)} step={this.unitStep()} maximumValue={this.displayValue(CHEST_PARAMETERS.max)} minimumValue={this.displayValue(CHEST_PARAMETERS.min)} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
             {
               this.updateChest(Util.measurment(val, this.state.selectionUnit));
               this.showBest();
             }
-          }
-          onValueChange = {(val) => {
+          } onValueChange {(val) => {
             this.setState({chest:
               Util.measurment(val, this.state.selectionUnit)
             });
             this.hideBest();
           }}/>
-          <Text
-            style={{flex: 2}}>{this.unitDisplay(this.state.chest)}</Text>
+          <Text style={{
+              flex: 2
+            }}>{this.unitDisplay(this.state.chest)}</Text>
         </View>
 
         <View style={styles.slider_controller_container}>
-          <Text
-            style={{flex: 1}}>Waist </Text>
-          <Slider
-            value={this.displayValue(WAIST_PARAMETERS.default)}
-            maximumValue={this.displayValue(WAIST_PARAMETERS.max)}
-            minimumValue={this.displayValue(WAIST_PARAMETERS.min)}
-            step={this.unitStep()}
-            style={styles.slider_container}
-            trackStyle={styles.track}
-            thumbStyle={styles.thumb}
-            onSlidingComplete = {(val) =>
+          <Text style={{
+              flex: 1
+            }}>Waist
+          </Text>
+          <Slider value={this.displayValue(WAIST_PARAMETERS.default)} maximumValue={this.displayValue(WAIST_PARAMETERS.max)} minimumValue={this.displayValue(WAIST_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
               {
                 this.updateWaist(Util.measurment(val, this.state.selectionUnit));
                 this.showBest();
               }
-            }
-            onValueChange = {(val) => {
+            } onValueChange {(val) => {
               this.setState({waist:
                 Util.measurment(val, this.state.selectionUnit)
               });
               this.hideBest();
             }}/>
-            <Text
-              style={{flex: 2}}>{this.unitDisplay(this.state.waist)}</Text>
+          <Text style={{
+              flex: 2
+            }}>{this.unitDisplay(this.state.waist)}</Text>
         </View>
 
         <View style={styles.slider_controller_container}>
-          <Text
-            style={{flex: 1}}>Hip </Text>
-          <Slider
-            value={this.displayValue(HIP_PARAMETERS.default)}
-            maximumValue={this.displayValue(HIP_PARAMETERS.max)}
-            minimumValue={this.displayValue(HIP_PARAMETERS.min)}
-            step={this.unitStep()}
-            style={styles.slider_container}
-            trackStyle={styles.track}
-            thumbStyle={styles.thumb}
-            onSlidingComplete = {(val) =>
+          <Text style={{
+              flex: 1
+            }}>Hip
+          </Text>
+          <Slider value={this.displayValue(HIP_PARAMETERS.default)} maximumValue={this.displayValue(HIP_PARAMETERS.max)} minimumValue={this.displayValue(HIP_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
               {
                 this.updateHip(Util.measurment(val, this.state.selectionUnit));
                 this.showBest();
               }
-            }
-            onValueChange = {(val) => {
+            } onValueChange {(val) => {
               this.setState({hip:
                 Util.measurment(val, this.state.selectionUnit)
               });
               this.hideBest();
             }}/>
-            <Text
-              style={{flex: 2}}>{this.unitDisplay(this.state.hip)}</Text>
+          <Text style={{
+              flex: 2
+            }}>{this.unitDisplay(this.state.hip)}</Text>
         </View>
 
-        <View
-          style={
-            [
-              {
-                marginBottom: 20,
-              },
-              styles.slider_controller_container
-            ]
-          }
-          >
-          <Text
-            style={{flex: 1}}>Height </Text>
-          <Slider
-            value={this.displayValue(HEIGHT_PARAMETERS.default)}
-            maximumValue={this.displayValue(HEIGHT_PARAMETERS.max)}
-            minimumValue={this.displayValue(HEIGHT_PARAMETERS.min)}
-            step={this.unitStep()}
-            style={styles.slider_container}
-            trackStyle={styles.track}
-            thumbStyle={styles.thumb}
-            onSlidingComplete = {(val) =>
+        <View style={[
+            {
+              marginBottom: 20
+            },
+            styles.slider_controller_container
+          ]}>
+          <Text style={{
+              flex: 1
+            }}>Height
+          </Text>
+          <Slider value={this.displayValue(HEIGHT_PARAMETERS.default)} maximumValue={this.displayValue(HEIGHT_PARAMETERS.max)} minimumValue={this.displayValue(HEIGHT_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
               {
                 this.updateHeight(Util.measurment(val, this.state.selectionUnit));
                 this.showBest();
               }
-            }
-            onValueChange = {(val) => {
+            } onValueChange {(val) => {
               this.setState({height:
                 Util.measurment(val, this.state.selectionUnit)
               });
               this.hideBest();
             }}/>
-            <Text style={{flex: 2}}>{this.unitDisplay(this.state.height)}</Text>
+          <Text style={{
+              flex: 2
+            }}>{this.unitDisplay(this.state.height)}</Text>
         </View>
       </View>
     </View>);
