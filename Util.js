@@ -1,3 +1,12 @@
+import React from 'react';
+import {
+  StyleSheet,
+  View,
+  Text
+} from 'react-native';
+
+import { Button, ListItem, Icon } from 'react-native-elements';
+
 class Util {
   constructor() {}
 
@@ -151,6 +160,69 @@ class Util {
     ret.bestFitWaistDelta = bestFitSize.bestFitWaistDelta;
     ret.bestFitHeightDelta = bestFitSize.bestFitHeightDelta;
     return ret;
+  }
+
+  static fitIcon(fit) {
+    var icon;
+    var color;
+
+    if(fit == 0) {
+      icon = 'done';
+    } else if(fit < 0) {
+      icon = null;
+    } else if (fit > 0) {
+      icon = null;
+    }
+
+    if(Math.abs(fit) == 0) {
+      color = 'green'
+    } else if(Math.abs(fit) < 2) {
+      color = 'orange'
+    } else if(Math.abs(fit) < 4) {
+      color = 'orange'
+    } else if(Math.abs(fit) < 6) {
+      color = 'red'
+    } else {
+      color = 'red'
+    }
+
+  return (
+    <View style={{
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex:1
+    }}>
+      <Icon
+        style={{
+          flex: 2,
+        }}
+        reverse
+        name={icon}
+        color={color} >
+        </Icon>
+        <Text
+          style={{
+            fontSize: 18,
+            color: 'white',
+            position: 'absolute',
+            textAlign: 'center',
+          }}>
+          {Util.formatFit(fit)}
+        </Text>
+
+
+      </View>
+    );
+  }
+
+  static formatFit(fit) {
+    if(fit == 0) {
+      return "";
+    } else if(fit>0) {
+      return ("+"+fit);
+    } else {
+      return (fit);
+    }
   }
 }
 

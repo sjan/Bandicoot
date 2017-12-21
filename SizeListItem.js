@@ -22,7 +22,8 @@ export default class SizeListItem extends React.Component {
 
   render() {
     if(this.props.header) {
-      return (<View style={{
+      return (
+        <View style={{
           flexDirection: 'row',
           alignItems: 'flex-end',
           height: 50
@@ -47,7 +48,33 @@ export default class SizeListItem extends React.Component {
           }}>Height</Text>
         </View>
       );
+    } else if(this.props.footer) {
+      return (
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+          height: 20
+        }}>
+          <Text style={{
+            marginLeft: 16,
+            flex: 2
+          }}>
 
+          </Text>
+          <Text style={{
+            flex: 1,
+          }}></Text>
+          <Text style={{
+            flex: 1,
+          }}></Text>
+          <Text style={{
+            flex: 1,
+          }}></Text>
+          <Text style={{
+            flex: 1,
+          }}>See More</Text>
+        </View>
+      );
     } else {
       return (
           <ListItem

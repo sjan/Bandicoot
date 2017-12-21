@@ -3,7 +3,7 @@ import { Text, List, ListItem, Icon, Button  } from 'react-native-elements';
 import { View, ScrollView, FlatList, StyleSheet } from 'react-native';
 import SizeListItem from './SizeListItem';
 
-export default class FindSizeView extends React.Component {
+export default class ExploreSizeView extends React.Component {
   static navigationOptions = {
     title: 'Brand and Size',
   };
