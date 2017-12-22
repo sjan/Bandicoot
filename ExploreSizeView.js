@@ -125,7 +125,8 @@ export default class ExploreSizeView extends React.Component {
     const {state} = this.props.navigation;
     var showAll = this.state.showAll;
 
-    return (<ScrollView>
+    return (
+      <ScrollView>
       {
         state.params.fitResultArray.filter(function(brandData) {
           if (brandData.fit.length <= 0) {

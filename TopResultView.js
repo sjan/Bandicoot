@@ -1,9 +1,10 @@
 import React from 'react';
 import {StyleSheet, View, Text, PanResponder} from 'react-native';
 
-import {Button, ListItem, Icon} from 'react-native-elements';
+import {Button, ListItem, Icon, List} from 'react-native-elements';
 import SizeListItem from './SizeListItem';
 import Util from './Util';
+import MoreResultView from './MoreResultView';
 
 export default class TopResultView extends React.Component {
 
@@ -17,7 +18,7 @@ export default class TopResultView extends React.Component {
       bestFitBrand: props.bestFitBrand,
       bestFitSize: props.bestFitSize,
       brandSelection: props.brandSelection,
-      dimensions: undefined
+      fitResultArray: props.fitResultArray
     };
   }
 
@@ -52,6 +53,7 @@ export default class TopResultView extends React.Component {
   }
 
   render() {
+    console.log("TopResultsView " + JSON.stringify(this.props.fitResultArray));
     return (
     <View style={[
         {
@@ -59,77 +61,76 @@ export default class TopResultView extends React.Component {
           height: '100%'
         },
         this.props.style
-      ]} {...this._panResponder.panHandlers} onLayout={this.onLayout}>
-      <View nativeID={"top-result-spacer"} style={{
-          height: 20
-        }}/>
-      <View nativeID={"top-result-best-fit"} style={{
-          flexDirection: 'row',
+      ]}>
+      <View
+        nativeID={"top-result-best-fit-label"}
+        style={{
           alignItems: 'center',
-          height: 80
-        }}>
-        <View style={{
-            flexDirection: 'column',
-            alignItems: 'center'
+          flexDirection: 'row',
+        }}
+        {...this._panResponder.panHandlers}>
+        <Text style={{
+            flex: 1,
           }}>
-          <Text style={{
-              flex: 1,
-              alignItems: 'center',
-              height: 10,
-              fontSize: 14
-            }}>
-            Best Size and Brand
-          </Text>
-          <Text style={{
-              flex: 1,
-              fontSize: 14
-            }}>{this.props.bestFitBrand + " " + this.props.bestFitSize}
-          </Text>
-        </View>
-        <View style={{
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-          <Text style={{
+          Size
+        </Text>
+        <Text style={{
               flex: 1
             }}>Chest</Text>
-          {Util.fitIcon(this.props.bestFitChestDelta)}
-        </View>
-
-        <View style={{
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-          <Text style={{
+        <Text style={{
               flex: 1
             }}>Waist</Text>
-          {Util.fitIcon(this.props.bestFitWaistDelta)}
-        </View>
-
-        <View style={{
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-          <Text style={{
+        <Text style={{
               flex: 1
             }}>Hip</Text>
-          {Util.fitIcon(this.props.bestFitHipDelta)}
-        </View>
-        <View style={{
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}>
-          <Text style={{
+        <Text style={{
               flex: 1
             }}>Height</Text>
-          {Util.fitIcon(this.props.bestFitHeightDelta)}
-        </View>
       </View>
-      <Text>Test text</Text>
-    </View>);
-  }
+      <View
+        nativeID={"top-result-best-fit-data"}
+        style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}>
+      <Text style={{flex: 1}}>
+        {this.props.bestFitBrand + " " + this.props.bestFitSize}
+      </Text>
+      {Util.fitIcon(this.props.bestFitChestDelta )}
+      {Util.fitIcon(this.props.bestFitWaistDelta )}
+      {Util.fitIcon(this.props.bestFitHipDelta )}
+      {Util.fitIcon(this.props.bestFitHeightDelta )}
+      </View>
+      <View
+        style={{
+          alignItems: 'center',
+        }}
 
-  onLayout = event => {
-    console.log("onLayout " + JSON.stringify(event.nativeEvent.layout));
+        nativeID={"more-results-label"}>
+        <Text
+          >
+          More Sizes
+        </Text>
+      </View>
+      <List>
+        {
+          this.props.topResults.
+          map((sizeItem, j) => (
+            <View key={j}
+              style={{
+              flexDirection: 'row',
+            }}>
+            <Text style={{flex: 1}}>
+              {sizeItem.brand + " " + sizeItem.size}
+            </Text>
+
+            {Util.fitIcon(sizeItem.chest.fit)}
+            {Util.fitIcon(sizeItem.waist.fit)}
+            {Util.fitIcon(sizeItem.hip.fit)}
+            {Util.fitIcon(sizeItem.height.fit)}
+            </View>))
+        }
+      </List>    
+    </View>);
   }
 }

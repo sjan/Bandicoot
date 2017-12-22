@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View, Text, ScrollView} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 
 import {List, ListItem, Icon, Button} from 'react-native-elements';
 import SizeListItem from './SizeListItem';
@@ -24,37 +24,31 @@ export default class MoreResultView extends React.Component {
 
   render() {
     var showAll = this.state.showAll;
-    var moreResults = this.props.moreResults;
 
-    return (<ScrollView>
+    console.log("result " + JSON.stringify(this.props.fitResultArray));
+
+    return (<View>
       {
-        this.props.fitResultArray.filter(function(brandData) {
-          if (!moreResults || brandData.fit.length <= 0) {
-            return false;
-          } else {
-            return true;
-          }
-        }).map((brandItem, i) => (<View key={i}>
-          <List>
+
+        this.props.fitResultArray.map((brandItem, i) => (
+
+          <List key={i}>
             {
               brandItem.fit.filter(function(sizeData) {
-                if (!showAll[brandItem.brand]) {
-                  if (sizeData.size == brandItem.bestFit.size) {
-                    return true;
-                  } else if (sizeData.delta > 4) {
-                    return false;
-                  } else {
-                    return true;
-                  }
-                } else {
-                  return true;
-                }
-              }).map((sizeItem, j) => (<SizeListItem key={j} chestFit={sizeItem.chest.fit} waistFit={sizeItem.waist.fit} hipFit={sizeItem.hip.fit} heightFit={sizeItem.height.fit} label={sizeItem.brand + " " + sizeItem.size}></SizeListItem>))
+                return true;
+              }).map((sizeItem, j) =>
+              (<SizeListItem
+                key={j}
+                chestFit={sizeItem.chest.fit}
+                waistFit={sizeItem.waist.fit}
+                hipFit={sizeItem.hip.fit}
+                heightFit={sizeItem.height.fit}
+                label={sizeItem.brand + " " + sizeItem.size}/>))
             }
           </List>
-        </View>))
+        ))
       }
 
-    </ScrollView>);
+    </View>);
   }
 }

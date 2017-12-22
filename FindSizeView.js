@@ -167,6 +167,7 @@ export default class FindSizeView extends React.Component {
       labelTransformation: new Animated.Value(0),
       labelOpacity: new Animated.Value(1),
 
+      topResults: sizeResult.topResults,
       fitResultArray: sizeResult.fitArray,
       bestFitBrand: sizeResult.bestFitBrand,
       bestFitSize: sizeResult.bestFitSize,
@@ -189,6 +190,7 @@ export default class FindSizeView extends React.Component {
 
     this.setState({
       chest: chestSize,
+      topResults: sizeResult.topResults,
       fitResultArray: sizeResult.fitArray,
       bestFitBrand: sizeResult.bestFitBrand,
       bestFitSize: sizeResult.bestFitSize,
@@ -204,6 +206,7 @@ export default class FindSizeView extends React.Component {
 
     this.setState({
       waist: waistSize,
+      topResults: sizeResult.topResults,
       fitResultArray: sizeResult.fitArray,
       bestFitBrand: sizeResult.bestFitBrand,
       bestFitSize: sizeResult.bestFitSize,
@@ -219,6 +222,7 @@ export default class FindSizeView extends React.Component {
 
     this.setState({
       hip: hipSize,
+      topResults: sizeResult.topResults,
       fitResultArray: sizeResult.fitArray,
       bestFitBrand: sizeResult.bestFitBrand,
       bestFitSize: sizeResult.bestFitSize,
@@ -228,6 +232,40 @@ export default class FindSizeView extends React.Component {
       bestFitHeightDelta: sizeResult.bestFitHeightDelta
     });
   }
+
+  updateSelectionBrand(selectionBrand) {
+   var sizeResult = Util.computeSize(
+     selectionBrand,
+     this.state.type,
+     this.state.sizeData,
+     this.state.chest,
+     this.state.height,
+     this.state.waist,
+     this.state.hip
+   );
+
+   this.setState(
+     {
+       selectionBrand: selectionBrand,
+       topResults: sizeResult.topResults,
+       fitResultArray: sizeResult.fitArray,
+       bestFitBrand: sizeResult.bestFitBrand,
+       bestFitSize: sizeResult.bestFitSize,
+       bestFitChestDelta: sizeResult.bestFitChestDelta,
+       bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+       bestFitHipDelta: sizeResult.bestFitHipDelta,
+       bestFitHeightDelta: sizeResult.bestFitHeightDelta,
+     }
+   );
+ }
+
+ updateSelectionUnit(unit) {
+     this.setState(
+       {
+         selectionUnit: unit,
+       }
+     );
+   }
 
   unitDisplay(value) {
     if (this.state.selectionUnit == 'METRIC') {
@@ -274,14 +312,11 @@ export default class FindSizeView extends React.Component {
     }).start();
   }
 
-  sum(a, b) {
-    return a + b;
-  }
 
   handleDrag(e, gestureState) {
-    console.log("delta y" + gestureState.dy + " new height: " + this.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy));
+    console.log("delta y" + gestureState.dy + " new height: " + Util.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy));
     this.setState({
-      labelHeight: new Animated.Value(this.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy))
+      labelHeight: new Animated.Value(Util.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy))
     })
   }
 
@@ -334,6 +369,8 @@ export default class FindSizeView extends React.Component {
 
     const {navigate} = this.props.navigation;
 
+    console.log(JSON.stringify(this.state.topResults));
+
     return (<View nativeID={"root-container"} style={{
         flex: 1,
         flexDirection: 'column',
@@ -369,17 +406,54 @@ export default class FindSizeView extends React.Component {
           },
           styles.label_container
         ]}>
-        <TopResultView bestFitChestDelta={this.state.bestFitChestDelta} bestFitWaistDelta={this.state.bestFitWaistDelta} bestFitHipDelta={this.state.bestFitHipDelta} bestFitHeightDelta={this.state.bestFitHeightDelta} bestFitBrand={this.state.bestFitBrand} bestFitSize={this.state.bestFitSize} brandSelection={this.state.selectionBrand} handleDrag={this.handleDrag} handleDragRelease={this.handleDragRelease}/>
-        <View style={{
+        <View nativeID={"top-result-spacer"} style={{
+            height: 20
+          }}/>
+        <TopResultView
+          bestFitChestDelta={this.state.bestFitChestDelta}
+          bestFitWaistDelta={this.state.bestFitWaistDelta}
+          bestFitHipDelta={this.state.bestFitHipDelta}
+          bestFitHeightDelta={this.state.bestFitHeightDelta}
+          bestFitBrand={this.state.bestFitBrand}
+          bestFitSize={this.state.bestFitSize}
+          brandSelection={this.state.selectionBrand}
+          handleDrag={this.handleDrag}
+          handleDragRelease={this.handleDragRelease}
+          topResults={this.state.topResults}
+        />
+        <View
+          nativeID={'bottom-bar'}
+          style={{
             position: 'absolute',
-            width: 30,
+            width: '100%',
             height: 30,
             bottom: 0,
             right: 0
           }}>
-          <Icon type='simple-line-icon' name={this.getArrowIcon()} onPress={() => {
-              console.log("click")
-            }}/>
+          <Icon
+            type='simple-line-icon'
+            name={this.getArrowIcon()}
+            onPress={() => {
+              if(this.state.moreResult) {
+                this.setState({
+                  moreResult: !this.state.moreResult
+                });
+
+                Animated.spring(this.state.labelHeight, {
+                  toValue: PARAMETERS.LABEL_HEIGHT,
+                  tension: PARAMETERS.LABEL_ANIMATION_TENSION
+                }).start();
+              } else {
+                this.setState({
+                  moreResult: !this.state.moreResult
+                });
+                Animated.spring(this.state.labelHeight, {
+                  toValue: PARAMETERS.LABEL_HEIGHT_EXPANDED,
+                  tension: PARAMETERS.LABEL_ANIMATION_TENSION
+                }).start();
+              }
+            }
+          }/>
         </View>
 
       </Animated.View>
@@ -407,7 +481,7 @@ export default class FindSizeView extends React.Component {
           <Picker selectedValue={this.state.selectionBrand} onValueChange={(itemValue, itemIndex) => {
               this.updateSelectionBrand(itemValue);
             }
-} style={{
+          } style={{
               width: "50%"
             }}>
             <Picker.Item label="All Brands" value="ALL"/>
@@ -419,7 +493,7 @@ export default class FindSizeView extends React.Component {
           <Picker selectedValue={this.state.selectionUnit} onValueChange={(itemValue, itemIndex) => {
               this.updateSelectionUnit(itemValue);
             }
-} style={{
+            } style={{
               width: "40%"
             }}>
             <Picker.Item label="Centimeter" value="METRIC"/>
@@ -431,17 +505,26 @@ export default class FindSizeView extends React.Component {
               flex: 1
             }}>Chest
           </Text>
-          <Slider value={this.displayValue(CHEST_PARAMETERS.default)} step={this.unitStep()} maximumValue={this.displayValue(CHEST_PARAMETERS.max)} minimumValue={this.displayValue(CHEST_PARAMETERS.min)} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
-            {
+          <Slider value = {
+              this.displayValue(CHEST_PARAMETERS.default)
+            }
+            step = {this.unitStep()}
+            maximumValue = {this.displayValue(CHEST_PARAMETERS.max)}
+            minimumValue = {this.displayValue(CHEST_PARAMETERS.min)}
+            style = {styles.slider_container}
+            trackStyle = {styles.track}
+            thumbStyle = {styles.thumb}
+            onSlidingComplete = {(val) => {
               this.updateChest(Util.measurment(val, this.state.selectionUnit));
               this.showBest();
+              }
             }
-          } onValueChange {(val) => {
-            this.setState({chest:
-              Util.measurment(val, this.state.selectionUnit)
-            });
-            this.hideBest();
-          }}/>
+            onValueChange = {(val) => {
+              this.setState({chest:
+                Util.measurment(val, this.state.selectionUnit)
+              });
+              this.hideBest();}
+            }/>
           <Text style={{
               flex: 2
             }}>{this.unitDisplay(this.state.chest)}</Text>
@@ -452,12 +535,12 @@ export default class FindSizeView extends React.Component {
               flex: 1
             }}>Waist
           </Text>
-          <Slider value={this.displayValue(WAIST_PARAMETERS.default)} maximumValue={this.displayValue(WAIST_PARAMETERS.max)} minimumValue={this.displayValue(WAIST_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
+          <Slider value={this.displayValue(WAIST_PARAMETERS.default)} maximumValue={this.displayValue(WAIST_PARAMETERS.max)} minimumValue={this.displayValue(WAIST_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete = {(val) =>
               {
                 this.updateWaist(Util.measurment(val, this.state.selectionUnit));
                 this.showBest();
               }
-            } onValueChange {(val) => {
+            } onValueChange = {(val) => {
               this.setState({waist:
                 Util.measurment(val, this.state.selectionUnit)
               });
@@ -473,12 +556,12 @@ export default class FindSizeView extends React.Component {
               flex: 1
             }}>Hip
           </Text>
-          <Slider value={this.displayValue(HIP_PARAMETERS.default)} maximumValue={this.displayValue(HIP_PARAMETERS.max)} minimumValue={this.displayValue(HIP_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
+          <Slider value={this.displayValue(HIP_PARAMETERS.default)} maximumValue={this.displayValue(HIP_PARAMETERS.max)} minimumValue={this.displayValue(HIP_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete = {(val) =>
               {
                 this.updateHip(Util.measurment(val, this.state.selectionUnit));
                 this.showBest();
               }
-            } onValueChange {(val) => {
+            } onValueChange = {(val) => {
               this.setState({hip:
                 Util.measurment(val, this.state.selectionUnit)
               });
@@ -499,12 +582,12 @@ export default class FindSizeView extends React.Component {
               flex: 1
             }}>Height
           </Text>
-          <Slider value={this.displayValue(HEIGHT_PARAMETERS.default)} maximumValue={this.displayValue(HEIGHT_PARAMETERS.max)} minimumValue={this.displayValue(HEIGHT_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete {(val) =>
+          <Slider value={this.displayValue(HEIGHT_PARAMETERS.default)} maximumValue={this.displayValue(HEIGHT_PARAMETERS.max)} minimumValue={this.displayValue(HEIGHT_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete = {(val) =>
               {
                 this.updateHeight(Util.measurment(val, this.state.selectionUnit));
                 this.showBest();
               }
-            } onValueChange {(val) => {
+            } onValueChange = {(val) => {
               this.setState({height:
                 Util.measurment(val, this.state.selectionUnit)
               });

@@ -56,9 +56,15 @@ class Util {
     }
   }
 
+
+  static sum(a, b) {
+    return a + b;
+  }
+
   static computeSize(selectionBrand, type, sizeData, chest, height, waist, hip) {
     var ret = new Object();
     var fitArray = [];
+    var fitArrayAll = [];
     var bestFitSize = {
         maxDelta: 100
     };
@@ -91,7 +97,38 @@ class Util {
               Math.abs(waistFit),
               Math.abs(hipFit));
 
+          totalDelta = Math.abs(chestFit) +
+              Math.abs(heightFit) +
+              Math.abs(waistFit) +
+              Math.abs(hipFit);
+
+
+
           if(selectionBrand == "ALL" || selectionBrand == brand) {
+
+            fitArrayAll.push({
+              delta: maxDelta,
+              totalDelta: totalDelta,
+              brand: brand,
+              size: sizeObject.size,
+              chest: {
+                fit: chestFit,
+                range: chestRange
+              },
+              waist: {
+                fit: waistFit,
+                range: waistRange
+              },
+              hip: {
+                fit: hipFit,
+                range: hipRange
+              },
+              height: {
+                fit: heightFit,
+                range: heightRange
+              }
+            });
+
                 if (maxDelta <= bestBrandFitSize.maxDelta) {
                       bestBrandFitSize.brand = brand;
                       bestBrandFitSize.maxDelta = maxDelta;
@@ -105,6 +142,7 @@ class Util {
                 brandArray.push(
                   {
                     delta: maxDelta,
+                    totalDelta: totalDelta,
                     brand: brand,
                     size: sizeObject.size,
                     chest: {
@@ -151,14 +189,25 @@ class Util {
       });
     }
 
+    fitArrayAll.sort(function(a, b) {
+      var ret = (a.delta - b.delta);
+      if(ret == 0) {
+        ret = a.totalDelta - b.totalDelta;
+      }
+      return ret;
+    });
+
+
+    bestFitSize = fitArrayAll[0];
+    ret.topResults = fitArrayAll.slice(1, 10);;
     ret.fitArray = fitArray;
-    ret.bestFitDelta = bestFitSize.maxDelta;
+    ret.bestFitDelta = bestFitSize.delta;
     ret.bestFitBrand = bestFitSize.brand;
     ret.bestFitSize = bestFitSize.size;
-    ret.bestFitChestDelta = bestFitSize.bestFitChestDelta;
-    ret.bestFitHipDelta = bestFitSize.bestFitHipDelta;
-    ret.bestFitWaistDelta = bestFitSize.bestFitWaistDelta;
-    ret.bestFitHeightDelta = bestFitSize.bestFitHeightDelta;
+    ret.bestFitChestDelta = bestFitSize.chest.fit;
+    ret.bestFitHipDelta = bestFitSize.hip.fit;
+    ret.bestFitWaistDelta = bestFitSize.waist.fit;
+    ret.bestFitHeightDelta = bestFitSize.height.fit;
     return ret;
   }
 
