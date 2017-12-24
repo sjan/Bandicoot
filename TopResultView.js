@@ -1,12 +1,18 @@
 import React from 'react';
-import {StyleSheet, View, Text, PanResponder} from 'react-native';
+import {StyleSheet, View, Text, PanResponder, Animated, TouchableHighlight } from 'react-native';
 
 import {Button, ListItem, Icon, List} from 'react-native-elements';
 import SizeListItem from './SizeListItem';
 import Util from './Util';
 import MoreResultView from './MoreResultView';
 
+const PARAMETERS = {
+  LABEL_HEIGHT: 90,
+}
+
+
 export default class TopResultView extends React.Component {
+
 
   constructor(props) {
     super(props);
@@ -18,8 +24,12 @@ export default class TopResultView extends React.Component {
       bestFitBrand: props.bestFitBrand,
       bestFitSize: props.bestFitSize,
       brandSelection: props.brandSelection,
-      fitResultArray: props.fitResultArray
+      labelHeightProgress: props.labelHeightProgress,
+      handleDrag: props.handleDrag,
+
     };
+
+    this._handlePanResponderMove = this._handlePanResponderMove.bind(this);
   }
 
   componentWillMount() {
@@ -28,10 +38,16 @@ export default class TopResultView extends React.Component {
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
       onPanResponderGrant: this._handlePanResponderGrant,
-      onPanResponderMove: this.props.handleDrag,
+      onPanResponderMove: this._handlePanResponderMove,
       onPanResponderRelease: this.props.handleDragRelease,
       onPanResponderTerminate: this._handlePanResponderEnd
     });
+  }
+
+  _handlePanResponderMove(e : Object, gestureState : Object): boolean {
+    console.log("_handlePanResponderMove " +  this.state.bestFitSize);
+    this.state.handleDrag(e, gestureState);
+    return true;
   }
 
   _handleStartShouldSetPanResponder(e : Object, gestureState : Object): boolean {
@@ -53,84 +69,134 @@ export default class TopResultView extends React.Component {
   }
 
   render() {
-    console.log("TopResultsView " + JSON.stringify(this.props.fitResultArray));
+    var test = (PARAMETERS.LABEL_HEIGHT+this.props.labelHeightProgress._value/20);
+
     return (
-    <View style={[
-        {
-          flexDirection: 'column',
-          height: '100%'
-        },
-        this.props.style
-      ]}>
-      <View
-        nativeID={"top-result-best-fit-label"}
-        style={{
-          alignItems: 'center',
-          flexDirection: 'row',
-        }}
-        {...this._panResponder.panHandlers}>
-        <Text style={{
-            flex: 1,
-          }}>
-          Size
-        </Text>
-        <Text style={{
-              flex: 1
-            }}>Chest</Text>
-        <Text style={{
-              flex: 1
-            }}>Waist</Text>
-        <Text style={{
-              flex: 1
-            }}>Hip</Text>
-        <Text style={{
-              flex: 1
-            }}>Height</Text>
-      </View>
-      <View
-        nativeID={"top-result-best-fit-data"}
-        style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}>
-      <Text style={{flex: 1}}>
-        {this.props.bestFitBrand + " " + this.props.bestFitSize}
-      </Text>
-      {Util.fitIcon(this.props.bestFitChestDelta )}
-      {Util.fitIcon(this.props.bestFitWaistDelta )}
-      {Util.fitIcon(this.props.bestFitHipDelta )}
-      {Util.fitIcon(this.props.bestFitHeightDelta )}
-      </View>
-      <View
-        style={{
-          alignItems: 'center',
-        }}
-
-        nativeID={"more-results-label"}>
-        <Text
-          >
-          More Sizes
-        </Text>
-      </View>
-      <List>
-        {
-          this.props.topResults.
-          map((sizeItem, j) => (
-            <View key={j}
+      <TouchableHighlight
+        onPress= {console.log("press!")}>
+        <View
+            nativeID={"top-result-menu"}
+            style={[
+            {
+              flexDirection: 'column',
+              height: '100%'
+            },
+            this.props.style
+          ]}>
+          <View
+            nativeID={"top-result-best-fit-label-conatiner"}
+            style={[
+              {
+                height: test,
+                flexDirection: 'column'
+              }
+            ]}>
+            <View
+              nativeID={"top-result-best-fit-label-text"}
               style={{
-              flexDirection: 'row',
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'center',
+              }}
+            >
+              <Text style={{
+                  flex: 1,
+                }}> Size
+              </Text>
+              <Text style={{
+                  flex: 1,
+                  textAlign: 'center'
+                }}>Chest</Text>
+              <Text style={{
+                flex: 1,
+                textAlign: 'center'
+                  }}>Waist</Text>
+              <Text style={{
+                flex: 1,
+                textAlign: 'center'
+                  }}>Hip</Text>
+              <Text style={{
+                flex: 1,
+                textAlign: 'center'
+                  }}>Height</Text>
+            </View>
+            <View
+              nativeID={"top-result-best-fit-label-data"}
+              style={{
+                flex: 3,
+                flexDirection: 'row',
+                justifyContent: 'center',
             }}>
-            <Text style={{flex: 1}}>
-              {sizeItem.brand + " " + sizeItem.size}
-            </Text>
+            <Text style={{
+              flex: 1,
 
-            {Util.fitIcon(sizeItem.chest.fit)}
-            {Util.fitIcon(sizeItem.waist.fit)}
-            {Util.fitIcon(sizeItem.hip.fit)}
-            {Util.fitIcon(sizeItem.height.fit)}
-            </View>))
-        }
-      </List>    
-    </View>);
+            }}>
+              {this.props.bestFitBrand + " " + this.props.bestFitSize}
+            </Text>
+            {Util.fitIcon(this.props.bestFitChestDelta )}
+            {Util.fitIcon(this.props.bestFitWaistDelta )}
+            {Util.fitIcon(this.props.bestFitHipDelta )}
+            {Util.fitIcon(this.props.bestFitHeightDelta )}
+            </View>
+            <View
+              nativeID={"top-result-best-fit-label-bottom"}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+              }}
+              nativeID={"more-results-label"}>
+              <Button
+                raised
+                icon={{name: 'home'}}
+                onPress = {() => {
+                  console.log('You tapped the button!');
+                }}
+              />
+            </View>
+          </View>
+
+          <List
+            style={[
+              {
+                backgroundColor: 'red'
+              }
+            ]}>
+            {
+              this.props.topResults.
+              map((sizeItem, j) => (
+                <View key={j}
+                  style={{
+                  flexDirection: 'row',
+                }}>
+                <Text style={{flex: 1}}>
+                  {sizeItem.brand + " " + sizeItem.size}
+                </Text>
+                {Util.fitIcon(sizeItem.chest.fit)}
+                {Util.fitIcon(sizeItem.waist.fit)}
+                {Util.fitIcon(sizeItem.hip.fit)}
+                {Util.fitIcon(sizeItem.height.fit)}
+                </View>))
+            }
+          </List>
+          <View
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: 45,
+              bottom: 0,
+              backgroundColor: 'lightgrey'
+            }}
+            {...this._panResponder.panHandlers}
+            >
+            <Icon
+              style={{
+              }}
+              onPress = {() => {
+                console.log('You tapped the button!');
+              }}
+              name='menu'/>
+          </View>
+        </View>
+  </TouchableHighlight>);
   }
 }

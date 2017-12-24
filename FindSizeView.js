@@ -9,7 +9,6 @@ import {
   Picker,
   Text
 } from 'react-native';
-import {Button, Icon} from 'react-native-elements';
 import Animation from 'lottie-react-native';
 import TopResultView from './TopResultView';
 import Util from './Util';
@@ -177,7 +176,7 @@ export default class FindSizeView extends React.Component {
       bestFitHeightDelta: sizeResult.bestFitHeightDelta,
       selectionBrand: PARAMETERS.INITIAL_SELECTION_BRAND,
       selectionUnit: PARAMETERS.INITIAL_SELECTION_MEASUREMENT,
-      moreResults: false,
+      expanded: false,
       animationProgress: new Animated.Value(0)
     };
 
@@ -206,6 +205,22 @@ export default class FindSizeView extends React.Component {
 
     this.setState({
       waist: waistSize,
+      topResults: sizeResult.topResults,
+      fitResultArray: sizeResult.fitArray,
+      bestFitBrand: sizeResult.bestFitBrand,
+      bestFitSize: sizeResult.bestFitSize,
+      bestFitChestDelta: sizeResult.bestFitChestDelta,
+      bestFitWaistDelta: sizeResult.bestFitWaistDelta,
+      bestFitHipDelta: sizeResult.bestFitHipDelta,
+      bestFitHeightDelta: sizeResult.bestFitHeightDelta
+    });
+  }
+
+  updateHeight(heightSize) {
+    var sizeResult = Util.computeSize(this.state.selectionBrand, this.state.type, this.state.sizeData, this.state.chest, heightSize, this.state.waist, this.state.hip);
+
+    this.setState({
+      height: heightSize,
       topResults: sizeResult.topResults,
       fitResultArray: sizeResult.fitArray,
       bestFitBrand: sizeResult.bestFitBrand,
@@ -284,6 +299,7 @@ export default class FindSizeView extends React.Component {
   }
 
   showBest() {
+    this.setState({expanded: false});
     Animated.spring(this.state.labelTransformation, {
       toValue: 0,
       tension: PARAMETERS.LABEL_ANIMATION_TENSION
@@ -315,8 +331,19 @@ export default class FindSizeView extends React.Component {
 
   handleDrag(e, gestureState) {
     console.log("delta y" + gestureState.dy + " new height: " + Util.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy));
+    var baselineHeight;
+    if(this.state.expanded) {
+      baselineHeight = PARAMETERS.LABEL_HEIGHT_EXPANDED;
+    } else {
+      baselineHeight = PARAMETERS.LABEL_HEIGHT;
+    }
+
+    newBaseline = Util.sum(baselineHeight, gestureState.dy);
+    newBaseline = Math.max(newBaseline , PARAMETERS.LABEL_HEIGHT - 30);
+    newBaseline = Math.min(newBaseline , PARAMETERS.LABEL_HEIGHT_EXPANDED + 50);
+
     this.setState({
-      labelHeight: new Animated.Value(Util.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy))
+      labelHeight: new Animated.Value(newBaseline)
     })
   }
 
@@ -331,7 +358,7 @@ export default class FindSizeView extends React.Component {
       moreResult = false;
     }
 
-    this.setState({moreResults: moreResult});
+    this.setState({expanded: moreResult});
 
     Animated.spring(this.state.labelHeight, {
       toValue: newHeight,
@@ -369,7 +396,7 @@ export default class FindSizeView extends React.Component {
 
     const {navigate} = this.props.navigation;
 
-    console.log(JSON.stringify(this.state.topResults));
+    //console.log(JSON.stringify(this.state.topResults));
 
     return (<View nativeID={"root-container"} style={{
         flex: 1,
@@ -395,10 +422,9 @@ export default class FindSizeView extends React.Component {
             opacity: labelOpacity,
             transform: [
               {
-                translateY: this.state.labelTransformation.interpolate({
-                  inputRange: [
-                    0, 1
-                  ],
+                translateY: this.state.labelTransformation
+                .interpolate({
+                  inputRange: [ 0, 1 ],
                   outputRange: [0, PARAMETERS.LABEL_DISPLACEMENT]
                 })
               }
@@ -406,9 +432,9 @@ export default class FindSizeView extends React.Component {
           },
           styles.label_container
         ]}>
-        <View nativeID={"top-result-spacer"} style={{
-            height: 20
-          }}/>
+        <View
+          nativeID={"top-result-spacer"}
+          style={{height: 20}}/>
         <TopResultView
           bestFitChestDelta={this.state.bestFitChestDelta}
           bestFitWaistDelta={this.state.bestFitWaistDelta}
@@ -419,43 +445,9 @@ export default class FindSizeView extends React.Component {
           brandSelection={this.state.selectionBrand}
           handleDrag={this.handleDrag}
           handleDragRelease={this.handleDragRelease}
+          labelHeightProgress={this.state.labelHeight}
           topResults={this.state.topResults}
         />
-        <View
-          nativeID={'bottom-bar'}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: 30,
-            bottom: 0,
-            right: 0
-          }}>
-          <Icon
-            type='simple-line-icon'
-            name={this.getArrowIcon()}
-            onPress={() => {
-              if(this.state.moreResult) {
-                this.setState({
-                  moreResult: !this.state.moreResult
-                });
-
-                Animated.spring(this.state.labelHeight, {
-                  toValue: PARAMETERS.LABEL_HEIGHT,
-                  tension: PARAMETERS.LABEL_ANIMATION_TENSION
-                }).start();
-              } else {
-                this.setState({
-                  moreResult: !this.state.moreResult
-                });
-                Animated.spring(this.state.labelHeight, {
-                  toValue: PARAMETERS.LABEL_HEIGHT_EXPANDED,
-                  tension: PARAMETERS.LABEL_ANIMATION_TENSION
-                }).start();
-              }
-            }
-          }/>
-        </View>
-
       </Animated.View>
       <View style={styles.controller_container}>
         <View style={{
@@ -478,7 +470,9 @@ export default class FindSizeView extends React.Component {
             justifyContent: 'center',
             flexDirection: 'row'
           }}>
-          <Picker selectedValue={this.state.selectionBrand} onValueChange={(itemValue, itemIndex) => {
+          <Picker
+            selectedValue={this.state.selectionBrand}
+            onValueChange={(itemValue, itemIndex) => {
               this.updateSelectionBrand(itemValue);
             }
           } style={{
@@ -517,6 +511,7 @@ export default class FindSizeView extends React.Component {
             onSlidingComplete = {(val) => {
               this.updateChest(Util.measurment(val, this.state.selectionUnit));
               this.showBest();
+
               }
             }
             onValueChange = {(val) => {
