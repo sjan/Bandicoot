@@ -211,7 +211,7 @@ class Util {
     return ret;
   }
 
-  static fitIcon(fit) {
+  static fitIcon(fit, reverse) {
     var icon;
     var color;
 
@@ -235,21 +235,20 @@ class Util {
       color = 'red'
     }
 
+if(reverse) {
   return (
     <View style={{
       justifyContent: 'center',
       alignItems: 'center',
-      flex:1
+      width: 50,
+      height: 50
     }}>
       <Icon
-        style={{
-          flex: 2,
-        }}
         reverse
         name={icon}
         color={color} >
-        </Icon>
-        <Text
+      </Icon>
+      <Text
           style={{
             fontSize: 18,
             color: 'white',
@@ -258,10 +257,37 @@ class Util {
           }}>
           {Util.formatFit(fit)}
         </Text>
-
-
-      </View>
+    </View>
     );
+  } else {
+    return (
+
+      <View style={{
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        width: '100%',
+        height: 20
+      }}>
+          <Icon
+            name={icon}
+            color={color} >
+          </Icon>
+          <Text
+          style={{
+            fontSize: 18,
+            color: 'black',
+            position: 'absolute',
+            textAlign: 'center',
+          }}>
+          {Util.formatFit(fit)}
+        </Text>
+        </View>
+      );
+  }
+  }
+
+  static formatString(input) {
+     return input.charAt(0).toUpperCase() + input.toLowerCase().slice(1);
   }
 
   static formatFit(fit) {

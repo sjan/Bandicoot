@@ -21,7 +21,7 @@ let sizeData = {
 };
 
 const PARAMETERS = {
-  LABEL_HEIGHT: 125,
+  LABEL_HEIGHT: 84,
   LABEL_HEIGHT_HIDE: 20,
   LABEL_HEIGHT_EXPANDED: 400,
   LABEL_ELEVATION: 5,
@@ -122,7 +122,10 @@ const styles = StyleSheet.create({
   },
   slider_container: {
     height: 30,
-    flex: 5
+    flex: 8
+  },
+  slider_text: {
+    flex: 2
   },
   track: {
     height: 2,
@@ -164,7 +167,7 @@ export default class FindSizeView extends React.Component {
       labelElevation: new Animated.Value(PARAMETERS.LABEL_ELEVATION),
       labelHeight: new Animated.Value(PARAMETERS.LABEL_HEIGHT),
       labelTransformation: new Animated.Value(0),
-      labelOpacity: new Animated.Value(1),
+      labelIconRotation: new Animated.Value(0),
 
       topResults: sizeResult.topResults,
       fitResultArray: sizeResult.fitArray,
@@ -181,6 +184,7 @@ export default class FindSizeView extends React.Component {
     };
 
     this.handleDrag = this.handleDrag.bind(this);
+    this.handleTap = this.handleTap.bind(this);
     this.handleDragRelease = this.handleDragRelease.bind(this);
   }
 
@@ -300,6 +304,11 @@ export default class FindSizeView extends React.Component {
 
   showBest() {
     this.setState({expanded: false});
+    Animated.spring(this.state.labelIconRotation, {
+      toValue: 0,
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION
+    }).start();
+
     Animated.spring(this.state.labelTransformation, {
       toValue: 0,
       tension: PARAMETERS.LABEL_ANIMATION_TENSION
@@ -342,9 +351,41 @@ export default class FindSizeView extends React.Component {
     newBaseline = Math.max(newBaseline , PARAMETERS.LABEL_HEIGHT - 30);
     newBaseline = Math.min(newBaseline , PARAMETERS.LABEL_HEIGHT_EXPANDED + 50);
 
-    this.setState({
-      labelHeight: new Animated.Value(newBaseline)
-    })
+    Animated.spring(this.state.labelHeight, {
+      toValue: newBaseline,
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION,
+      friction: PARAMETERS.LABEL_ANIMATION_FRICTION
+    }).start();
+  }
+
+  handleTap(e, gestureState) {
+    if(this.state.expanded) {
+      this.setState({expanded: false});
+      Animated.spring(this.state.labelHeight, {
+        toValue: PARAMETERS.LABEL_HEIGHT,
+        tension: PARAMETERS.LABEL_ANIMATION_TENSION,
+        friction: PARAMETERS.LABEL_ANIMATION_FRICTION
+      }).start();
+      Animated.spring(this.state.labelIconRotation, {
+        toValue: new Animated.Value(1),
+        tension: PARAMETERS.LABEL_ANIMATION_TENSION,
+        friction: PARAMETERS.LABEL_ANIMATION_FRICTION
+      }).start();
+    } else {
+      this.setState({expanded: true});
+
+      Animated.spring(this.state.labelHeight, {
+          toValue: PARAMETERS.LABEL_HEIGHT_EXPANDED,
+          tension: PARAMETERS.LABEL_ANIMATION_TENSION,
+          friction: PARAMETERS.LABEL_ANIMATION_FRICTION
+      }).start();
+      Animated.spring(this.state.labelIconRotation, {
+        toValue: new Animated.Value(1),
+        tension: PARAMETERS.LABEL_ANIMATION_TENSION,
+        friction: PARAMETERS.LABEL_ANIMATION_FRICTION
+      }).start();
+      console.log("expanded");
+    }
   }
 
   handleDragRelease(e, gestureState) {
@@ -384,10 +425,12 @@ export default class FindSizeView extends React.Component {
   }
 
   render() {
+    console.log("render FindSizeView " + JSON.stringify(this.state.labelHeight));
     let {
       labelElevation,
+      labelIconRotation,
       labelHeight,
-      labelOpacity,
+      labelTransformation,
       chest,
       waist,
       hip,
@@ -396,13 +439,14 @@ export default class FindSizeView extends React.Component {
 
     const {navigate} = this.props.navigation;
 
-    //console.log(JSON.stringify(this.state.topResults));
-
-    return (<View nativeID={"root-container"} style={{
-        flex: 1,
-        flexDirection: 'column',
-        marginBottom: 24
-      }}>
+    return (
+      <View
+        nativeID={"root-container"}
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          marginBottom: 24
+        }}>
       <View nativeID={"display-container"} style={{
           flex: 6,
           alignItems: 'center'
@@ -415,41 +459,10 @@ export default class FindSizeView extends React.Component {
             height: 200
           }} source={require('./resources/animation.json')} progress={this.state.animationProgress}/>
       </View>
-      <Animated.View style={[
-          {
-            elevation: labelElevation,
-            height: labelHeight,
-            opacity: labelOpacity,
-            transform: [
-              {
-                translateY: this.state.labelTransformation
-                .interpolate({
-                  inputRange: [ 0, 1 ],
-                  outputRange: [0, PARAMETERS.LABEL_DISPLACEMENT]
-                })
-              }
-            ]
-          },
-          styles.label_container
-        ]}>
-        <View
-          nativeID={"top-result-spacer"}
-          style={{height: 20}}/>
-        <TopResultView
-          bestFitChestDelta={this.state.bestFitChestDelta}
-          bestFitWaistDelta={this.state.bestFitWaistDelta}
-          bestFitHipDelta={this.state.bestFitHipDelta}
-          bestFitHeightDelta={this.state.bestFitHeightDelta}
-          bestFitBrand={this.state.bestFitBrand}
-          bestFitSize={this.state.bestFitSize}
-          brandSelection={this.state.selectionBrand}
-          handleDrag={this.handleDrag}
-          handleDragRelease={this.handleDragRelease}
-          labelHeightProgress={this.state.labelHeight}
-          topResults={this.state.topResults}
-        />
-      </Animated.View>
-      <View style={styles.controller_container}>
+
+      <View
+        nativeID={"control-container"}
+        style={styles.controller_container}>
         <View style={{
             flex: 1,
             alignItems: 'center',
@@ -495,11 +508,10 @@ export default class FindSizeView extends React.Component {
           </Picker>
         </View>
         <View style={styles.slider_controller_container}>
-          <Text style={{
-              flex: 1
-            }}>Chest
-          </Text>
-          <Slider value = {
+          <Text style = {styles.slider_text} >Chest</Text>
+          <Slider
+
+            value = {
               this.displayValue(CHEST_PARAMETERS.default)
             }
             step = {this.unitStep()}
@@ -511,7 +523,6 @@ export default class FindSizeView extends React.Component {
             onSlidingComplete = {(val) => {
               this.updateChest(Util.measurment(val, this.state.selectionUnit));
               this.showBest();
-
               }
             }
             onValueChange = {(val) => {
@@ -520,15 +531,11 @@ export default class FindSizeView extends React.Component {
               });
               this.hideBest();}
             }/>
-          <Text style={{
-              flex: 2
-            }}>{this.unitDisplay(this.state.chest)}</Text>
+          <Text style = {styles.slider_text}>{this.unitDisplay(this.state.chest)}</Text>
         </View>
 
         <View style={styles.slider_controller_container}>
-          <Text style={{
-              flex: 1
-            }}>Waist
+          <Text style = {styles.slider_text}>Waist
           </Text>
           <Slider value={this.displayValue(WAIST_PARAMETERS.default)} maximumValue={this.displayValue(WAIST_PARAMETERS.max)} minimumValue={this.displayValue(WAIST_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete = {(val) =>
               {
@@ -541,15 +548,11 @@ export default class FindSizeView extends React.Component {
               });
               this.hideBest();
             }}/>
-          <Text style={{
-              flex: 2
-            }}>{this.unitDisplay(this.state.waist)}</Text>
+          <Text style = {styles.slider_text}>{this.unitDisplay(this.state.waist)}</Text>
         </View>
 
         <View style={styles.slider_controller_container}>
-          <Text style={{
-              flex: 1
-            }}>Hip
+          <Text style = {styles.slider_text}>Hip
           </Text>
           <Slider value={this.displayValue(HIP_PARAMETERS.default)} maximumValue={this.displayValue(HIP_PARAMETERS.max)} minimumValue={this.displayValue(HIP_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete = {(val) =>
               {
@@ -562,9 +565,7 @@ export default class FindSizeView extends React.Component {
               });
               this.hideBest();
             }}/>
-          <Text style={{
-              flex: 2
-            }}>{this.unitDisplay(this.state.hip)}</Text>
+          <Text style = {styles.slider_text}>{this.unitDisplay(this.state.hip)}</Text>
         </View>
 
         <View style={[
@@ -573,9 +574,7 @@ export default class FindSizeView extends React.Component {
             },
             styles.slider_controller_container
           ]}>
-          <Text style={{
-              flex: 1
-            }}>Height
+          <Text style = {styles.slider_text}>Height
           </Text>
           <Slider value={this.displayValue(HEIGHT_PARAMETERS.default)} maximumValue={this.displayValue(HEIGHT_PARAMETERS.max)} minimumValue={this.displayValue(HEIGHT_PARAMETERS.min)} step={this.unitStep()} style={styles.slider_container} trackStyle={styles.track} thumbStyle={styles.thumb} onSlidingComplete = {(val) =>
               {
@@ -588,11 +587,47 @@ export default class FindSizeView extends React.Component {
               });
               this.hideBest();
             }}/>
-          <Text style={{
-              flex: 2
-            }}>{this.unitDisplay(this.state.height)}</Text>
+          <Text style = {styles.slider_text}>{this.unitDisplay(this.state.height)}</Text>
         </View>
       </View>
+      <Animated.View style={[
+          {
+            elevation: labelElevation,
+            height: labelHeight,
+            transform: [
+              {
+                translateY: labelTransformation
+                .interpolate({
+                  inputRange: [ 0, 1 ],
+                  outputRange: [0, PARAMETERS.LABEL_DISPLACEMENT]
+                })
+              }
+            ]
+          },
+          styles.label_container
+        ]}>
+        <View
+          nativeID={"top-result-spacer"}
+          style={{
+            height: PARAMETERS.LABEL_HEIGHT_HIDE,
+          }}/>
+        <TopResultView
+          bestFitChestDelta={this.state.bestFitChestDelta}
+          bestFitWaistDelta={this.state.bestFitWaistDelta}
+          bestFitHipDelta={this.state.bestFitHipDelta}
+          bestFitHeightDelta={this.state.bestFitHeightDelta}
+          bestFitBrand={this.state.bestFitBrand}
+          bestFitSize={this.state.bestFitSize}
+          brandSelection={this.state.selectionBrand}
+          handleDrag={this.handleDrag}
+          handleTap={this.handleTap}
+          handleDragRelease={this.handleDragRelease}
+          labelHeightProgress={this.state.labelHeight}
+          topResults={this.state.topResults}
+          labelIconRotation={this.state.labelIconRotation}
+        />
+
+      </Animated.View>
     </View>);
   }
 }
