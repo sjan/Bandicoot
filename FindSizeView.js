@@ -20,6 +20,7 @@ let sizeData = {
   "NEGRINI": require('./resources/negrini_2017.json')
 };
 
+
 const PARAMETERS = {
   LABEL_HEIGHT: 84,
   LABEL_HEIGHT_HIDE: 20,
@@ -183,9 +184,18 @@ export default class FindSizeView extends React.Component {
       animationProgress: new Animated.Value(0)
     };
 
+    this.state.labelHeight.addListener(
+      ({value}) => {
+        this.renderCount =  Math.floor(((value - PARAMETERS.LABEL_HEIGHT)/64));
+      }
+    );
+
     this.handleDrag = this.handleDrag.bind(this);
     this.handleTap = this.handleTap.bind(this);
     this.handleDragRelease = this.handleDragRelease.bind(this);
+    this.handleShowAll = this.handleShowAll.bind(this);
+
+
   }
 
   updateChest(chestSize) {
@@ -337,15 +347,33 @@ export default class FindSizeView extends React.Component {
     }).start();
   }
 
+  handleShowAll(e) {
+    const { navigate } = this.props.navigation;
+
+    navigate(
+      'ExploreSizeView',
+       {
+         size: {
+           chest: this.state.chest,
+           waist: this.state.waist,
+           hip: this.state.hip,
+           height: this.state.height
+         },
+         fitResultArray: this.state.fitResultArray,
+       }
+    );
+  }
 
   handleDrag(e, gestureState) {
-    console.log("delta y" + gestureState.dy + " new height: " + Util.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy));
+    //console.log("delta y" + gestureState.dy + " new height: " + Util.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy));
     var baselineHeight;
     if(this.state.expanded) {
       baselineHeight = PARAMETERS.LABEL_HEIGHT_EXPANDED;
     } else {
       baselineHeight = PARAMETERS.LABEL_HEIGHT;
     }
+
+    space = baselineHeight - PARAMETERS.LABEL_HEIGHT;
 
     newBaseline = Util.sum(baselineHeight, gestureState.dy);
     newBaseline = Math.max(newBaseline , PARAMETERS.LABEL_HEIGHT - 30);
@@ -424,6 +452,8 @@ export default class FindSizeView extends React.Component {
     }
   }
 
+
+
   render() {
     console.log("render FindSizeView " + JSON.stringify(this.state.labelHeight));
     let {
@@ -437,7 +467,7 @@ export default class FindSizeView extends React.Component {
       height
     } = this.state;
 
-    const {navigate} = this.props.navigation;
+
 
     return (
       <View
@@ -620,6 +650,7 @@ export default class FindSizeView extends React.Component {
           bestFitSize={this.state.bestFitSize}
           brandSelection={this.state.selectionBrand}
           handleDrag={this.handleDrag}
+          handleShowAll={this.handleShowAll}
           handleTap={this.handleTap}
           handleDragRelease={this.handleDragRelease}
           labelHeightProgress={this.state.labelHeight}

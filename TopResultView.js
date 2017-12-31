@@ -1,10 +1,10 @@
 import React from 'react';
-import {StyleSheet, View, Text, PanResponder, Animated, TouchableHighlight } from 'react-native';
-
+import {StyleSheet, View, Text, PanResponder, Animated, TouchableHighlight, ListView } from 'react-native';
 import {Button, ListItem, Icon, List} from 'react-native-elements';
 import SizeListItem from './SizeListItem';
 import Util from './Util';
 import MoreResultView from './MoreResultView';
+import CloseFitList from "./CloseFitList"
 
 const PARAMETERS = {
   LABEL_HEIGHT: 64,
@@ -15,7 +15,8 @@ const PARAMETERS = {
   TOP_LABEL_EXPANDED_FONT_SIZE: 18,
   TOP_LABEL_HEIGHT: 64,
   TOP_LABEL_HEIGHT_EXPANDED: 88,
-  MARGIN: 16
+  MARGIN: 16,
+  MARGIN_LEFT: 32
 }
 
 const styles = StyleSheet.create({
@@ -23,9 +24,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 32,
-    marginRight: 32
+    marginLeft: PARAMETERS.MARGIN_LEFT,
+    marginRight: PARAMETERS.MARGIN_LEFT
   },
+
   subtitle_container: {
     height: '100%',
     marginTop: PARAMETERS.MARGIN,
@@ -35,10 +37,13 @@ const styles = StyleSheet.create({
   }
 });
 
+var rowsToShow;
+
 export default class TopResultView extends React.Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
       bestFitChestDelta: props.bestFitChestDelta,
       bestFitWaistDelta: props.bestFitWaistDelta,
@@ -47,39 +52,21 @@ export default class TopResultView extends React.Component {
       bestFitBrand: props.bestFitBrand,
       bestFitSize: props.bestFitSize,
       brandSelection: props.brandSelection,
-      labelHeightProgress: props.labelHeightProgress,
       handleDrag: props.handleDrag,
       handleTap: props.handleTap,
-      count: 4,
+      handleShowAll: props.handleShowAll,
       labelIconRotation: props.labelIconRotation,
-      testFontSize: new Animated.Value(0),
+      labelFontSize: new Animated.Value(0),
       bestFitViewHeight: new Animated.Value(0),
-      labelTransformationMap: {
-        0: new Animated.Value(0),
-        1: new Animated.Value(0),
-        2: new Animated.Value(0),
-        3: new Animated.Value(0),
-        4: new Animated.Value(0),
-        5: new Animated.Value(0),
-        6: new Animated.Value(0),
-      },
-
-      labelOpacityMap: {
-        0: new Animated.Value(0),
-        1: new Animated.Value(0),
-        2: new Animated.Value(0),
-        3: new Animated.Value(0),
-        4: new Animated.Value(0),
-        5: new Animated.Value(0),
-        6: new Animated.Value(0),
-      }
+      rowCount: 0,
     };
+
+
 
     this._handlePanResponderMove = this._handlePanResponderMove.bind(this);
   }
 
   componentWillMount() {
-    console.log("componentWillMount");
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -91,18 +78,15 @@ export default class TopResultView extends React.Component {
   }
 
   _handlePanResponderMove(e : Object, gestureState : Object): boolean {
-    console.log("_handlePanResponderMove " +  this.state.bestFitSize);
     this.state.handleDrag(e, gestureState);
     return true;
   }
 
   _handleStartShouldSetPanResponder(e : Object, gestureState : Object): boolean {
-    console.log("_handleStartShouldSetPanResponder");
     return true;
   }
 
   _handleMoveShouldSetPanResponder(e : Object, gestureState : Object): boolean {
-    console.log("_handleMoveShouldSetPanResponder");
     return true;
   }
 
@@ -156,7 +140,7 @@ export default class TopResultView extends React.Component {
               },
               styles.subtitle_container]}>
               <Animated.Text style={{
-                fontSize: this.state.testFontSize
+                fontSize: this.state.labelFontSize
                 .interpolate({
                   inputRange: [ 0, 1 ],
                   outputRange: [PARAMETERS.TOP_LABEL_FONT_SIZE, PARAMETERS.TOP_LABEL_EXPANDED_FONT_SIZE]
@@ -215,72 +199,24 @@ export default class TopResultView extends React.Component {
               ]}>
               <Icon
                 onPress = {() => {
-                  console.log("tapped icon");
-                    this.state.handleTap();
+                  this.state.handleTap();
                 }}
-                type='font-awesome'
-                name='caret-down'/>
+                name='menu-down'
+                type='material-community'/>
             </Animated.View>
             </View>
           </Animated.View>
 
-          <List>
-            {
-              this.props.topResults.slice(0, this.state.count).
-              map((sizeItem, j) => (
-                <Animated.View
-                  key={j}
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      height: PARAMETERS.LIST_ITEM_HEIGHT,
-                      marginRight: 40,
-                      opacity: this.state.labelOpacityMap[j],
-                      transform: [
-                        {
-                          translateY: this.state.labelTransformationMap[j]
-                          .interpolate({
-                            inputRange: [ 0, 1 ],
-                            outputRange: [20, 0]
-                          })
-                        }
-                      ]
-
-                  }}>
-                <View
-                  style={[{
-                    flex: 2,
-                    marginLeft: PARAMETERS.MARGIN,
-                    marginTop: PARAMETERS.MARGIN,
-                  },
-                  styles.subtitle_container]}>
-                  <Text>
-                    {Util.formatString(sizeItem.brand) + " " + sizeItem.size}
-                  </Text>
-              </View>
-              <View style={[{flex: 1},styles.subtitle_container]}>
-                {Util.fitIcon(sizeItem.chest.fit, true)}
-              </View>
-              <View style={[{flex: 1},styles.subtitle_container]}>
-                {Util.fitIcon(sizeItem.waist.fit, true)}
-              </View>
-              <View style={[{flex: 1},styles.subtitle_container]}>
-                {Util.fitIcon(sizeItem.hip.fit, true)}
-              </View>
-              <View style={[{flex: 1},styles.subtitle_container]}>
-                {Util.fitIcon(sizeItem.height.fit, true)}
-              </View>
-            </Animated.View>))
-            }
-          </List>
-
+          <CloseFitList
+            renderCount = {this.rowsToShow}
+            sizeData = {this.props.topResults}
+            allResultsCallback = {this.state.handleShowAll}/>
           <View
             style={{
               position: 'absolute',
               width: '100%',
               height: 20,
-              bottom: 0
+              bottom: 15
             }}>
             <Icon
               name='equal'
@@ -290,40 +226,27 @@ export default class TopResultView extends React.Component {
   </TouchableHighlight>);
   }
 
-  getRenderCount() {
-    return 4;
-  }
+
 
   measureView(event) {
-    count = Math.round(event.nativeEvent.layout.height/PARAMETERS.LABEL_HEIGHT)-2;
-    console.log("visibility count " + count);
+    var tt = this.state.bestFitViewHeight.interpolate({
+      inputRange: [ 0, 1 ],
+      outputRange: [PARAMETERS.TOP_LABEL_HEIGHT, PARAMETERS.TOP_LABEL_HEIGHT_EXPANDED]
+    });
+    var totalHeight = event.nativeEvent.layout.height - PARAMETERS.TOP_LABEL_HEIGHT_EXPANDED;
+    var listHeight = PARAMETERS.LABEL_HEIGHT;
+    this.rowsToShow = Math.round(totalHeight/listHeight);
 
+    // console.log("show: " + this.rowsToShow);
+
+    count = Math.round(event.nativeEvent.layout.height/PARAMETERS.LABEL_HEIGHT)-2;
+    // console.log("visibility count " + this.state.rowCount + " height " + event.nativeEvent.layout.height + " " + rowsToShow);
     if(count>0) {
       index = count-1;
-
-      for(var i=0;i<5;i++) {
-        if(i<count && this.state.labelOpacityMap[i]._value == 0) {
-          Animated.spring(this.state.labelOpacityMap[i], {
-           toValue: 1,
-           tension: PARAMETERS.LABEL_ANIMATION_TENSION
-          }).start();
-          Animated.spring(this.state.labelTransformationMap[i], {
-           toValue: 1,
-           tension: PARAMETERS.LABEL_ANIMATION_TENSION
-          }).start();
-        } else if(i>=count && this.state.labelOpacityMap[i]._value == 1) {
-          Animated.spring(this.state.labelOpacityMap[i], {
-           toValue: 0,
-           tension: PARAMETERS.LABEL_ANIMATION_TENSION
-          }).start();
-          Animated.spring(this.state.labelTransformationMap[i], {
-           toValue: 0,
-           tension: PARAMETERS.LABEL_ANIMATION_TENSION
-          }).start();
-        }
-      }
+      this.setState({
+          rowCount: index,
+      });
     }
-
 
     if(event.nativeEvent.layout.height > 225 && this.state.labelIconRotation != 1) {
       Animated.spring(this.state.labelIconRotation, {
@@ -340,7 +263,7 @@ export default class TopResultView extends React.Component {
 
     if(event.nativeEvent.layout.height > 125 && this.state.labelIconRotation != 1) {
 
-        Animated.spring(this.state.testFontSize, {
+        Animated.spring(this.state.labelFontSize, {
           toValue: 1,
           tension: PARAMETERS.LABEL_ANIMATION_TENSION
         }).start();
@@ -349,13 +272,9 @@ export default class TopResultView extends React.Component {
           toValue: 1,
           tension: PARAMETERS.LABEL_ANIMATION_TENSION
         }).start();
-
-
-
-
     } else if(event.nativeEvent.layout.height < 100 && this.state.labelIconRotation != 1) {
 
-      Animated.spring(this.state.testFontSize, {
+      Animated.spring(this.state.labelFontSize, {
         toValue: 0,
         tension: PARAMETERS.LABEL_ANIMATION_TENSION
       }).start();
