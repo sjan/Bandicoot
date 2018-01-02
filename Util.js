@@ -105,8 +105,8 @@ class Util {
 
 
           if(selectionBrand == "ALL" || selectionBrand == brand) {
-
             fitArrayAll.push({
+              id: chest.cmValue+"-"+height.cmValue+"-"+waist.cmValue+"-"+hip.cmValue+"-"+brand+"-"+sizeObject.size,
               delta: maxDelta,
               totalDelta: totalDelta,
               brand: brand,
@@ -284,6 +284,34 @@ if(reverse) {
         </View>
       );
   }
+  }
+
+  static generateInputRange() {
+    return([0,1,2,3,4,5,6]);
+  }
+
+  static generateOutputOpacityRange(index){
+    out = [0, 0, 0, 0, 0, 0, 0];
+    for(i=index+3;i<out.length;i++) {
+      out[i] = 1;
+    }
+    return(out);
+  }
+
+  static generateOutputRange(index, height){
+    out = [-height, -height, -height, -height, -height, -height, -height];
+    for(i=index+3;i<out.length;i++) {
+      out[i] = 0;
+    }
+    return(out);
+  }
+
+  static generateOutputRange2(index, height){
+    out = [0, 0, 0, 0, 0, 0, 0];
+    for(i=index+3;i<out.length;i++) {
+      out[i] = height;
+    }
+    return(out);
   }
 
   static formatString(input) {

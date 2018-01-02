@@ -4,29 +4,9 @@ import Util from './Util';
 import DynamicListRow from './DynamicListRow';
 
 const PARAMETERS = {
-  LABEL_HEIGHT: 64,
-  LABEL_HEIGHT_EXPANDED: 88,
-  LABEL_ANIMATION_TENSION: 20,
-  LIST_ITEM_HEIGHT: 70,
-  TOP_LABEL_FONT_SIZE: 12,
-  TOP_LABEL_EXPANDED_FONT_SIZE: 18,
-  TOP_LABEL_HEIGHT: 64,
-  TOP_LABEL_HEIGHT_EXPANDED: 88,
+  SECTION_LABEL_HEIGHT: 35,
   MARGIN: 16
 }
-
-const styles = StyleSheet.create({
-  container: {
-    height: '100%',
-  },
-  subtitle_container: {
-    height: '100%',
-    marginTop: PARAMETERS.MARGIN,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    flexDirection: 'column'
-  },
-});
 
 export default class CloseFitList extends React.Component {
   constructor(props) {
@@ -34,92 +14,95 @@ export default class CloseFitList extends React.Component {
 
       this.state = {
        renderCount: this.props.renderCount,
-       dataSource: this.props.sizeData,
        loading     : true,
        refreshing  : false,
-
        allResultsCallback: this.props.allResultsCallback,
-
+       labelHeightProgress: this.props.labelHeightProgress
       };
+
+      this.renderItem = this.renderItem.bind(this);
     }
 
 
    render() {
-
        return (
-           <View style={styles.container}>
-                  <FlatList
-                   data={this.props.sizeData.slice(0,this.props.renderCount)}
-                   renderItem={this.renderItem}
-                   keyExtractor={this._keyExtractor}
-                 />
-                 <View
-                   style={{
-                     position: 'absolute',
-                     width: '100%',
-                     height: 200,
-                     bottom: 0,
-                     justifyContent: 'center',
-                     alignItems: 'flex-end',
-                   }}>
-                   <Button onPress={(val) => {
-                      console.log('preess');
-                      this.state.allResultsCallback();
-                    }
-                  }
-                    title="More"
-                    color='blue'/>
+           <Animated.View
+             style={[{
+               flexDirection: 'column',
+                height: this.state.labelHeightProgress.interpolate({
+                extrapolate: 'clamp',
+                 inputRange: [ 0, 1, 2, 3, 4, 5, 6 ],
+                 outputRange: [
+                   0,
+                   0,
+                   PARAMETERS.SECTION_LABEL_HEIGHT,
+                   105,
+                   175,
+                   245,
+                   290
+                 ]
+               })
+             }]}>
+             <Animated.View
+                 style={{
+                   height: PARAMETERS.SECTION_LABEL_HEIGHT,
+                   opacity: this.state.labelHeightProgress
+                   .interpolate({
+                       inputRange: Util.generateInputRange(),
+                       outputRange: Util.generateOutputOpacityRange(-1)
+                   }),
+                   transform: [
+                     {
+                       translateY: this.state.labelHeightProgress
+                       .interpolate({
+                           inputRange: Util.generateInputRange(),
+                           outputRange: Util.generateOutputRange(-1, PARAMETERS.SECTION_LABEL_HEIGHT)
+                       })
+                     }
+                   ]
+               }}>
+               <Text style={{marginLeft: 16, marginTop: 16}}>Close fit</Text>
+             </Animated.View>
 
-                 </View>
-           </View>
+              <FlatList
+                 data={this.props.sizeData.slice(0,this.props.renderCount)}
+                 renderItem={this.renderItem}
+                 keyExtractor={this._keyExtractor}
+                 extraData={this.props.sizeData}
+               />
+               <Animated.View
+                 style={{
+                   height: this.state.labelHeightProgress
+                   .interpolate({
+                       inputRange: Util.generateInputRange(),
+                       outputRange: Util.generateOutputRange2(3, PARAMETERS.LIST_ITEM_HEIGHT)
+                   }),
+                   opacity: this.state.labelHeightProgress
+                   .interpolate({
+                       inputRange: Util.generateInputRange(),
+                       outputRange: Util.generateOutputOpacityRange(3)
+                   })
+               }}>
+               <Button
+                onPress={() => {this.state.allResultsCallback();}}
+                title="More"
+                />
+               </Animated.View>
+           </Animated.View>
        );
    }
 
   renderItem({ item, index }) {
-     return <DynamicListRow
-    item={item}/>;
+    return (
+      <DynamicListRow
+        item={item}
+        index={index}
+        labelHeightProgress={this.state.labelHeightProgress}
+      />);
   }
 
-  _keyExtractor= (item, index) => (item.brand + "-" + item.size);
-
-   _renderRow(sizeItem1, index) {
-
-     var sizeItem = sizeItem1.item;
-      return (
-        <Animated.View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: PARAMETERS.LIST_ITEM_HEIGHT,
-              marginRight: 40,
-              opacity: 1,
-          }}>
-        <View
-          style={[{
-            flex: 2,
-            marginLeft: PARAMETERS.MARGIN,
-            marginTop: PARAMETERS.MARGIN,
-          },
-          styles.subtitle_container]}>
-          <Text>
-            {Util.formatString(sizeItem.brand) + " " + sizeItem.size}
-          </Text>
-        </View>
-        <View style={[{flex: 1},styles.subtitle_container]}>
-        {Util.fitIcon(sizeItem.chest.fit, true)}
-        </View>
-        <View style={[{flex: 1},styles.subtitle_container]}>
-        {Util.fitIcon(sizeItem.waist.fit, true)}
-        </View>
-        <View style={[{flex: 1},styles.subtitle_container]}>
-        {Util.fitIcon(sizeItem.hip.fit, true)}
-        </View>
-        <View style={[{flex: 1},styles.subtitle_container]}>
-        {Util.fitIcon(sizeItem.height.fit, true)}
-        </View>
-        </Animated.View>
-      );
-   }
-
+  _keyExtractor= (item, index) => {
+    //console.log("key extractor for " + JSON.stringify(item));
+    return (item.id+"-"+index)
+  };
  }

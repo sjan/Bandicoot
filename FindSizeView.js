@@ -22,17 +22,20 @@ let sizeData = {
 
 
 const PARAMETERS = {
-  LABEL_HEIGHT: 84,
-  LABEL_HEIGHT_HIDE: 20,
-  LABEL_HEIGHT_EXPANDED: 400,
+  LABEL_HEIGHT_SPACER: 20,
+  LABEL_HEIGHT_COLLAPSED: 84,
+  LABEL_HEIGHT_EXPANDED: 108,
+  ANCHOR_PONT_1: 143,
+  ANCHOR_PONT_2: 223,
+  ANCHOR_PONT_3: 293,
+  ANCHOR_PONT_4: 363,
+  LABEL_EXPANDED: 400,
+  LABEL_EXPANDED_GIVE: 20,
   LABEL_ELEVATION: 5,
   LABEL_ANIMATION_TENSION: 20,
   LABEL_ANIMATION_FRICTION: 5,
   LABEL_DISPLACEMENT: -115,
-  ANCHOR_PONT: 255,
-
   TEST_ANIMATION_TENSION: 1,
-
   INITIAL_SELECTION_BRAND: 'ALL',
   INITIAL_SELECTION_TYPE: 'MEN',
   INITIAL_SELECTION_MEASUREMENT: 'METRIC'
@@ -166,9 +169,8 @@ export default class FindSizeView extends React.Component {
       height: HEIGHT_PARAMETERS.default,
 
       labelElevation: new Animated.Value(PARAMETERS.LABEL_ELEVATION),
-      labelHeight: new Animated.Value(PARAMETERS.LABEL_HEIGHT),
+      labelHeight: new Animated.Value(0),
       labelTransformation: new Animated.Value(0),
-      labelIconRotation: new Animated.Value(0),
 
       topResults: sizeResult.topResults,
       fitResultArray: sizeResult.fitArray,
@@ -183,12 +185,6 @@ export default class FindSizeView extends React.Component {
       expanded: false,
       animationProgress: new Animated.Value(0)
     };
-
-    this.state.labelHeight.addListener(
-      ({value}) => {
-        this.renderCount =  Math.floor(((value - PARAMETERS.LABEL_HEIGHT)/64));
-      }
-    );
 
     this.handleDrag = this.handleDrag.bind(this);
     this.handleTap = this.handleTap.bind(this);
@@ -314,10 +310,6 @@ export default class FindSizeView extends React.Component {
 
   showBest() {
     this.setState({expanded: false});
-    Animated.spring(this.state.labelIconRotation, {
-      toValue: 0,
-      tension: PARAMETERS.LABEL_ANIMATION_TENSION
-    }).start();
 
     Animated.spring(this.state.labelTransformation, {
       toValue: 0,
@@ -332,7 +324,7 @@ export default class FindSizeView extends React.Component {
 
   hideBest() {
     Animated.spring(this.state.labelHeight, {
-      toValue: PARAMETERS.LABEL_HEIGHT,
+      toValue: 0,
       tension: PARAMETERS.LABEL_ANIMATION_TENSION
     }).start();
 
@@ -364,53 +356,53 @@ export default class FindSizeView extends React.Component {
     );
   }
 
-  handleDrag(e, gestureState) {
-    //console.log("delta y" + gestureState.dy + " new height: " + Util.sum(PARAMETERS.LABEL_HEIGHT, gestureState.dy));
-    var baselineHeight;
+  computeGesture(gestureState) {
+    var baseline;
+
     if(this.state.expanded) {
-      baselineHeight = PARAMETERS.LABEL_HEIGHT_EXPANDED;
+      baseline = PARAMETERS.LABEL_EXPANDED;
     } else {
-      baselineHeight = PARAMETERS.LABEL_HEIGHT;
+      baseline = PARAMETERS.LABEL_HEIGHT_COLLAPSED;
     }
 
-    space = baselineHeight - PARAMETERS.LABEL_HEIGHT;
+    baseline = baseline + gestureState.dy;
+    return(new Animated.Value(baseline).interpolate({
+      outputRange: [0, 1 ,2, 3, 4, 5, 6],
+      inputRange: [
+        PARAMETERS.LABEL_HEIGHT_COLLAPSED,
+        PARAMETERS.LABEL_HEIGHT_EXPANDED,
+        PARAMETERS.ANCHOR_PONT_1,
+        PARAMETERS.ANCHOR_PONT_2,
+        PARAMETERS.ANCHOR_PONT_3,
+        PARAMETERS.ANCHOR_PONT_4,
+        PARAMETERS.LABEL_EXPANDED]
+    }));
+  }
 
-    newBaseline = Util.sum(baselineHeight, gestureState.dy);
-    newBaseline = Math.max(newBaseline , PARAMETERS.LABEL_HEIGHT - 30);
-    newBaseline = Math.min(newBaseline , PARAMETERS.LABEL_HEIGHT_EXPANDED + 50);
-
+  handleDrag(e, gestureState) {
+    val = this.computeGesture(gestureState)
     Animated.spring(this.state.labelHeight, {
-      toValue: newBaseline,
+      toValue: val.__getValue(),
       tension: PARAMETERS.LABEL_ANIMATION_TENSION,
       friction: PARAMETERS.LABEL_ANIMATION_FRICTION
     }).start();
   }
 
   handleTap(e, gestureState) {
+    console.log("handleTap");
     if(this.state.expanded) {
       this.setState({expanded: false});
       Animated.spring(this.state.labelHeight, {
-        toValue: PARAMETERS.LABEL_HEIGHT,
-        tension: PARAMETERS.LABEL_ANIMATION_TENSION,
-        friction: PARAMETERS.LABEL_ANIMATION_FRICTION
-      }).start();
-      Animated.spring(this.state.labelIconRotation, {
-        toValue: new Animated.Value(1),
+        toValue: 0,
         tension: PARAMETERS.LABEL_ANIMATION_TENSION,
         friction: PARAMETERS.LABEL_ANIMATION_FRICTION
       }).start();
     } else {
       this.setState({expanded: true});
-
       Animated.spring(this.state.labelHeight, {
-          toValue: PARAMETERS.LABEL_HEIGHT_EXPANDED,
+          toValue: 6,
           tension: PARAMETERS.LABEL_ANIMATION_TENSION,
           friction: PARAMETERS.LABEL_ANIMATION_FRICTION
-      }).start();
-      Animated.spring(this.state.labelIconRotation, {
-        toValue: new Animated.Value(1),
-        tension: PARAMETERS.LABEL_ANIMATION_TENSION,
-        friction: PARAMETERS.LABEL_ANIMATION_FRICTION
       }).start();
       console.log("expanded");
     }
@@ -419,11 +411,21 @@ export default class FindSizeView extends React.Component {
   handleDragRelease(e, gestureState) {
     var newHeight;
     var moreResult;
-    if (this.state.labelHeight._value > PARAMETERS.ANCHOR_PONT) {
-      newHeight = PARAMETERS.LABEL_HEIGHT_EXPANDED;
+
+    console.log("release " + JSON.stringify(gestureState.vy));
+
+    //fling check
+    if(gestureState.vy < -0.4) {
+      newHeight = 0;
+      moreResult = false;
+    } else if(gestureState.vy > 0.4) {
+      newHeight = 6;
+      moreResult = true;
+    } else if (this.state.labelHeight._value > 3) {
+      newHeight = 6;
       moreResult = true;
     } else {
-      newHeight = PARAMETERS.LABEL_HEIGHT;
+      newHeight = 0;
       moreResult = false;
     }
 
@@ -452,13 +454,10 @@ export default class FindSizeView extends React.Component {
     }
   }
 
-
-
   render() {
     console.log("render FindSizeView " + JSON.stringify(this.state.labelHeight));
     let {
       labelElevation,
-      labelIconRotation,
       labelHeight,
       labelTransformation,
       chest,
@@ -466,8 +465,6 @@ export default class FindSizeView extends React.Component {
       hip,
       height
     } = this.state;
-
-
 
     return (
       <View
@@ -623,7 +620,22 @@ export default class FindSizeView extends React.Component {
       <Animated.View style={[
           {
             elevation: labelElevation,
-            height: labelHeight,
+
+            height: labelHeight.interpolate({
+              extrapolate: 'clamp',
+              inputRange: [0, 1 ,2, 3, 4, 5, 6, 7],
+              outputRange: [
+                PARAMETERS.LABEL_HEIGHT_COLLAPSED,
+                PARAMETERS.LABEL_HEIGHT_EXPANDED,
+                PARAMETERS.ANCHOR_PONT_1,
+                PARAMETERS.ANCHOR_PONT_2,
+                PARAMETERS.ANCHOR_PONT_3,
+                PARAMETERS.ANCHOR_PONT_4,
+                PARAMETERS.LABEL_EXPANDED,
+                (PARAMETERS.LABEL_EXPANDED+20)
+              ]
+            }),
+
             transform: [
               {
                 translateY: labelTransformation
@@ -639,7 +651,7 @@ export default class FindSizeView extends React.Component {
         <View
           nativeID={"top-result-spacer"}
           style={{
-            height: PARAMETERS.LABEL_HEIGHT_HIDE,
+            height: PARAMETERS.LABEL_HEIGHT_SPACER,
           }}/>
         <TopResultView
           bestFitChestDelta={this.state.bestFitChestDelta}
@@ -655,9 +667,7 @@ export default class FindSizeView extends React.Component {
           handleDragRelease={this.handleDragRelease}
           labelHeightProgress={this.state.labelHeight}
           topResults={this.state.topResults}
-          labelIconRotation={this.state.labelIconRotation}
         />
-
       </Animated.View>
     </View>);
   }

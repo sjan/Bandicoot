@@ -117,7 +117,7 @@ export default class ExploreSizeView extends React.Component {
     }
 
     obj.showAll[brand] = true;
-    console.log(JSON.stringify(obj));
+
     return obj;
   }
 
@@ -171,7 +171,7 @@ export default class ExploreSizeView extends React.Component {
               margin: 12,
               justifyContent: 'center'
             }}>
-            <Button small="small" raised="raised" borderRadius={3} title={this.hideShowButton(brandItem.brand)} onPress={(val) => {
+            <Button small="small" borderRadius={3} title={this.hideShowButton(brandItem.brand)} onPress={(val) => {
                 this.setState(this.enableBrand(brandItem.brand))
               }}/>
           </View>

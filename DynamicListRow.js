@@ -1,16 +1,9 @@
 import React from 'react';
-import {FlatList, View, StyleSheet, Text, Animated} from 'react-native';
+import {FlatList, View, StyleSheet, Text, Animated, Button} from 'react-native';
 import Util from './Util';
 
 const PARAMETERS = {
-  LABEL_HEIGHT: 64,
-  LABEL_HEIGHT_EXPANDED: 88,
-  LABEL_ANIMATION_TENSION: 20,
   LIST_ITEM_HEIGHT: 70,
-  TOP_LABEL_FONT_SIZE: 12,
-  TOP_LABEL_EXPANDED_FONT_SIZE: 18,
-  TOP_LABEL_HEIGHT: 64,
-  TOP_LABEL_HEIGHT_EXPANDED: 88,
   MARGIN: 16
 }
 
@@ -25,47 +18,52 @@ const styles = StyleSheet.create({
 });
 
 export default class DynamicListRow extends React.Component {
-   // these values will need to be fixed either within the component or sent through props
-   _defaultHeightValue = 60;
-   _defaultTransition  = 500;
    state = {
-       _rowHeight  : new Animated.Value(this._defaultHeightValue),
-       _rowOpacity : new Animated.Value(0),
-       sizeItem : this.props.item
+       sizeItem : this.props.item,
+       index : this.props.index,
+       last : this.props.last,
+       labelHeightProgress : this.props.labelHeightProgress,
+       allResultsCallback: this.props.allResultsCallback
    };
-   componentDidMount() {
-       Animated.timing(this.state._rowOpacity, {
-           toValue  : 1,
-           duration : this._defaultTransition
-       }).start()
-   }
-   componentWillReceiveProps(nextProps) {
-       if (nextProps.remove) {
-           this.onRemoving(nextProps.onRemoving);
-       } else {
-// we need this for iOS because iOS does not reset list row style properties
-           this.resetHeight()
-       }
-   }
-   onRemoving(callback) {
-       Animated.timing(this.state._rowHeight, {
-           toValue  : 0,
-           duration : this._defaultTransition
-       }).start(callback);
-   }
-   resetHeight() {
-       Animated.timing(this.state._rowHeight, {
-           toValue  : this._defaultHeightValue,
-           duration : 0
-       }).start();
-   }
+
    render() {
      let {
        sizeItem,
      } = this.state;
 
-
+     if(this.state.last) {
        return (
+          <Animated.View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'flex-end',
+                height: PARAMETERS.LIST_ITEM_HEIGHT,
+                marginRight: 40,
+                opacity: this.state.labelHeightProgress
+                .interpolate({
+                    inputRange: Util.generateInputRange(),
+                    outputRange: Util.generateOutputOpacityRange(this.state.index)
+                }),
+                transform: [
+                  {
+                    translateY: this.state.labelHeightProgress
+                    .interpolate({
+                      inputRange: Util.generateInputRange(),
+                      outputRange: Util.generateOutputRange(this.state.index, PARAMETERS.LIST_ITEM_HEIGHT),
+                      extrapolate: 'clamp'
+                    })
+                  }
+                ]
+            }}>
+            <Button
+              onPress= {() => {this.state.allResultsCallback();}}
+              title="All Fit"
+              />
+          </Animated.View>
+        );
+     }
+
+      return (
          <Animated.View
              style={{
                flexDirection: 'row',
@@ -73,7 +71,20 @@ export default class DynamicListRow extends React.Component {
                alignItems: 'center',
                height: PARAMETERS.LIST_ITEM_HEIGHT,
                marginRight: 40,
-               opacity: this.state._rowOpacity
+               opacity: this.state.labelHeightProgress
+               .interpolate({
+                   inputRange: Util.generateInputRange(),
+                   outputRange: Util.generateOutputOpacityRange(this.state.index)
+               }),
+               transform: [
+                 {
+                   translateY: this.state.labelHeightProgress
+                   .interpolate({
+                     inputRange: Util.generateInputRange(),
+                     outputRange: Util.generateOutputRange(this.state.index, PARAMETERS.LIST_ITEM_HEIGHT)
+                   })
+                 }
+               ]
            }}>
          <View
            style={[{

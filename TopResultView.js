@@ -1,6 +1,6 @@
 import React from 'react';
-import {StyleSheet, View, Text, PanResponder, Animated, TouchableHighlight, ListView } from 'react-native';
-import {Button, ListItem, Icon, List} from 'react-native-elements';
+import {StyleSheet, View, Text, PanResponder, Animated, TouchableHighlight, TouchableOpacity, ListView } from 'react-native';
+import {Button, ListItem, List, Icon, Divider} from 'react-native-elements';
 import SizeListItem from './SizeListItem';
 import Util from './Util';
 import MoreResultView from './MoreResultView';
@@ -55,13 +55,31 @@ export default class TopResultView extends React.Component {
       handleDrag: props.handleDrag,
       handleTap: props.handleTap,
       handleShowAll: props.handleShowAll,
-      labelIconRotation: props.labelIconRotation,
+      labelIconRotation: new Animated.Value(0),
       labelFontSize: new Animated.Value(0),
       bestFitViewHeight: new Animated.Value(0),
+      labelHeightProgress: props.labelHeightProgress,
       rowCount: 0,
     };
 
 
+    this.state.labelHeightProgress.addListener(({value}) => {
+      if(value>1) {
+
+        Animated.spring(this.state.labelIconRotation, {
+          toValue: 1,
+          tension: PARAMETERS.LABEL_ANIMATION_TENSION,
+          friction: PARAMETERS.LABEL_ANIMATION_FRICTION
+        }).start();
+      } else {
+
+        Animated.spring(this.state.labelIconRotation, {
+          toValue: 0,
+          tension: PARAMETERS.LABEL_ANIMATION_TENSION,
+          friction: PARAMETERS.LABEL_ANIMATION_FRICTION
+        }).start();
+      }
+    });
 
     this._handlePanResponderMove = this._handlePanResponderMove.bind(this);
   }
@@ -83,15 +101,19 @@ export default class TopResultView extends React.Component {
   }
 
   _handleStartShouldSetPanResponder(e : Object, gestureState : Object): boolean {
+    console.log("_handleStartShouldSetPanResponder e " + e + " gestureState " + JSON.stringify(gestureState));
     return true;
   }
 
   _handleMoveShouldSetPanResponder(e : Object, gestureState : Object): boolean {
+    console.log("_handleMoveShouldSetPanResponder e " + e + " gestureState " + JSON.stringify(gestureState));
     return true;
   }
 
   _handlePanResponderGrant(e : Object, gestureState : Object) {
-    console.log("_handlePanResponderGrant");
+    console.log("_handlePanResponderGrant e " + e + " gestureState " + JSON.stringify(gestureState));
+    return false;
+
   }
 
   _handlePanResponderEnd(e : Object, gestureState : Object) {
@@ -101,9 +123,8 @@ export default class TopResultView extends React.Component {
   render() {
     return (
       <TouchableHighlight>
-        <View
+        <Animated.View
             nativeID={"top-result-root"}
-            onLayout={(event) => this.measureView(event)}
             style={[
             {
               height: '100%',
@@ -116,9 +137,12 @@ export default class TopResultView extends React.Component {
             nativeID={"top-result-best-fit-label-conatiner"}
             style={[
               {
-                height: this.state.bestFitViewHeight.interpolate({
-                  inputRange: [ 0, 1 ],
-                  outputRange: [PARAMETERS.TOP_LABEL_HEIGHT, PARAMETERS.TOP_LABEL_HEIGHT_EXPANDED]
+                height: this.state.labelHeightProgress.interpolate({
+                  inputRange: [ 0, 1],
+                  outputRange: [
+                    PARAMETERS.TOP_LABEL_HEIGHT,
+                    PARAMETERS.TOP_LABEL_HEIGHT_EXPANDED],
+                  extrapolate: 'clamp'
                 }),
                 flexDirection: 'column'
               }
@@ -140,10 +164,12 @@ export default class TopResultView extends React.Component {
               },
               styles.subtitle_container]}>
               <Animated.Text style={{
-                fontSize: this.state.labelFontSize
-                .interpolate({
-                  inputRange: [ 0, 1 ],
-                  outputRange: [PARAMETERS.TOP_LABEL_FONT_SIZE, PARAMETERS.TOP_LABEL_EXPANDED_FONT_SIZE]
+                fontSize: this.state.labelHeightProgress.interpolate({
+                  inputRange: [ 0, 1],
+                  outputRange: [
+                    PARAMETERS.TOP_LABEL_FONT_SIZE,
+                    PARAMETERS.TOP_LABEL_EXPANDED_FONT_SIZE],
+                  extrapolate:'clamp'
                 })
 
               }}>{Util.formatString(this.props.bestFitBrand) + " " + this.props.bestFitSize}
@@ -184,105 +210,55 @@ export default class TopResultView extends React.Component {
                 fontSize: 12
               }}>Height</Text>
             </View>
+            <TouchableOpacity
+              style={{
+                height: '100%',
+              }}
+              onPress = {() => {
+                this.state.handleTap();
+            }}
+            >
             <Animated.View style={[
                 {
+
                   transform: [
                     {
-                      rotate : this.props.labelIconRotation
+                      rotate : this.state.labelIconRotation
                       .interpolate({
                         inputRange: [ 0, 1 ],
                         outputRange: ['0deg', '180deg']
                       })
                     }
                   ]
+                },
+                {
+                  height: '100%',
+                  marginTop: PARAMETERS.MARGIN,
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  flexDirection: 'column'
                 }
               ]}>
               <Icon
-                onPress = {() => {
-                  this.state.handleTap();
-                }}
-                name='menu-down'
-                type='material-community'/>
+                 name='menu-down'
+                 type='material-community'/>
             </Animated.View>
-            </View>
-          </Animated.View>
+          </TouchableOpacity>
 
-          <CloseFitList
-            renderCount = {this.rowsToShow}
-            sizeData = {this.props.topResults}
-            allResultsCallback = {this.state.handleShowAll}/>
-          <View
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: 20,
-              bottom: 15
-            }}>
-            <Icon
-              name='equal'
-              type='material-community'/>
           </View>
-        </View>
+          </Animated.View>
+          <Divider style={{ backgroundColor: 'grey' }} />
+          <TouchableOpacity
+          activeOpacity={1}
+          >
+          <CloseFitList
+            renderCount = {3}
+            sizeData = {this.props.topResults}
+            allResultsCallback = {this.state.handleShowAll}
+            labelHeightProgress = {this.state.labelHeightProgress}/>
+          </TouchableOpacity>
+
+        </Animated.View>
   </TouchableHighlight>);
-  }
-
-
-
-  measureView(event) {
-    var tt = this.state.bestFitViewHeight.interpolate({
-      inputRange: [ 0, 1 ],
-      outputRange: [PARAMETERS.TOP_LABEL_HEIGHT, PARAMETERS.TOP_LABEL_HEIGHT_EXPANDED]
-    });
-    var totalHeight = event.nativeEvent.layout.height - PARAMETERS.TOP_LABEL_HEIGHT_EXPANDED;
-    var listHeight = PARAMETERS.LABEL_HEIGHT;
-    this.rowsToShow = Math.round(totalHeight/listHeight);
-
-    // console.log("show: " + this.rowsToShow);
-
-    count = Math.round(event.nativeEvent.layout.height/PARAMETERS.LABEL_HEIGHT)-2;
-    // console.log("visibility count " + this.state.rowCount + " height " + event.nativeEvent.layout.height + " " + rowsToShow);
-    if(count>0) {
-      index = count-1;
-      this.setState({
-          rowCount: index,
-      });
-    }
-
-    if(event.nativeEvent.layout.height > 225 && this.state.labelIconRotation != 1) {
-      Animated.spring(this.state.labelIconRotation, {
-        toValue: 1,
-        tension: PARAMETERS.LABEL_ANIMATION_TENSION
-      }).start();
-
-    } else if(event.nativeEvent.layout.height < 100 && this.state.labelIconRotation != 0) {
-        Animated.spring(this.state.labelIconRotation, {
-          toValue: 0,
-          tension: PARAMETERS.LABEL_ANIMATION_TENSION
-        }).start();
-    }
-
-    if(event.nativeEvent.layout.height > 125 && this.state.labelIconRotation != 1) {
-
-        Animated.spring(this.state.labelFontSize, {
-          toValue: 1,
-          tension: PARAMETERS.LABEL_ANIMATION_TENSION
-        }).start();
-
-        Animated.spring(this.state.bestFitViewHeight, {
-          toValue: 1,
-          tension: PARAMETERS.LABEL_ANIMATION_TENSION
-        }).start();
-    } else if(event.nativeEvent.layout.height < 100 && this.state.labelIconRotation != 1) {
-
-      Animated.spring(this.state.labelFontSize, {
-        toValue: 0,
-        tension: PARAMETERS.LABEL_ANIMATION_TENSION
-      }).start();
-
-      Animated.spring(this.state.bestFitViewHeight, {
-        toValue: 0,
-        tension: PARAMETERS.LABEL_ANIMATION_TENSION
-      }).start();
-    }
   }
 }
