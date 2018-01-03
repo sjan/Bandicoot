@@ -10,6 +10,7 @@
 		"eslint": "^4.12.1",
 		"lottie-react-native": "^2.3.1",
 		"material-ui": "^0.20.0",
+		"material-ui-community-icons": "^0.15.0",
 		"react": "^16.0.0",
 		"react-dom": "^16.2.0",
 		"react-native": "0.49.5",
@@ -17,7 +18,7 @@
 		"react-native-material-design": "^0.3.7",
 		"react-native-material-design-styles": "^0.2.7",
 		"react-native-material-ui": "^1.18.0",
-		"react-native-vector-icons": "^4.4.2",
+		"react-native-vector-icons": "^4.4.3",
 		"react-navigation": "^1.0.0-beta.21"
 	},
 	"devDependencies": {

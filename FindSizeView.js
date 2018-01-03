@@ -23,8 +23,8 @@ let sizeData = {
 
 const PARAMETERS = {
   LABEL_HEIGHT_SPACER: 20,
-  LABEL_HEIGHT_COLLAPSED: 84,
   LABEL_HEIGHT_EXPANDED: 108,
+  LABEL_HEIGHT_COLLAPSED: 84,
   ANCHOR_PONT_1: 143,
   ANCHOR_PONT_2: 223,
   ANCHOR_PONT_3: 293,
@@ -34,8 +34,6 @@ const PARAMETERS = {
   LABEL_ELEVATION: 5,
   LABEL_ANIMATION_TENSION: 20,
   LABEL_ANIMATION_FRICTION: 5,
-  LABEL_DISPLACEMENT: -115,
-  TEST_ANIMATION_TENSION: 1,
   INITIAL_SELECTION_BRAND: 'ALL',
   INITIAL_SELECTION_TYPE: 'MEN',
   INITIAL_SELECTION_MEASUREMENT: 'METRIC'
@@ -318,7 +316,7 @@ export default class FindSizeView extends React.Component {
 
     Animated.spring(this.state.animationProgress, {
       toValue: 0,
-      tension: PARAMETERS.TEST_ANIMATION_TENSION
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION
     }).start();
   }
 
@@ -335,7 +333,7 @@ export default class FindSizeView extends React.Component {
 
     Animated.spring(this.state.animationProgress, {
       toValue: 1,
-      tension: PARAMETERS.TEST_ANIMATION_TENSION
+      tension: PARAMETERS.LABEL_ANIMATION_TENSION
     }).start();
   }
 
@@ -632,7 +630,7 @@ export default class FindSizeView extends React.Component {
                 PARAMETERS.ANCHOR_PONT_3,
                 PARAMETERS.ANCHOR_PONT_4,
                 PARAMETERS.LABEL_EXPANDED,
-                (PARAMETERS.LABEL_EXPANDED+20)
+                (PARAMETERS.LABEL_EXPANDED+PARAMETERS.LABEL_EXPANDED_GIVE)
               ]
             }),
 
@@ -641,7 +639,7 @@ export default class FindSizeView extends React.Component {
                 translateY: labelTransformation
                 .interpolate({
                   inputRange: [ 0, 1 ],
-                  outputRange: [0, PARAMETERS.LABEL_DISPLACEMENT]
+                  outputRange: [0, -PARAMETERS.LABEL_HEIGHT_EXPANDED]
                 })
               }
             ]

@@ -7,10 +7,7 @@ import MoreResultView from './MoreResultView';
 import CloseFitList from "./CloseFitList"
 
 const PARAMETERS = {
-  LABEL_HEIGHT: 64,
-  LABEL_HEIGHT_EXPANDED: 88,
   LABEL_ANIMATION_TENSION: 20,
-  LIST_ITEM_HEIGHT: 70,
   TOP_LABEL_FONT_SIZE: 12,
   TOP_LABEL_EXPANDED_FONT_SIZE: 18,
   TOP_LABEL_HEIGHT: 64,
@@ -36,8 +33,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column'
   }
 });
-
-var rowsToShow;
 
 export default class TopResultView extends React.Component {
 
@@ -106,8 +101,7 @@ export default class TopResultView extends React.Component {
   }
 
   _handleMoveShouldSetPanResponder(e : Object, gestureState : Object): boolean {
-    console.log("_handleMoveShouldSetPanResponder e " + e + " gestureState " + JSON.stringify(gestureState));
-    return true;
+     return gestureState.dx != 0 && gestureState.dy != 0;
   }
 
   _handlePanResponderGrant(e : Object, gestureState : Object) {
@@ -122,23 +116,23 @@ export default class TopResultView extends React.Component {
 
   render() {
     return (
-      <TouchableHighlight>
+      <TouchableOpacity>
         <Animated.View
             nativeID={"top-result-root"}
-            style={[
-            {
-              height: '100%',
-              justifyContent: 'flex-start'
-            }
-          ]}
-          {...this._panResponder.panHandlers}
-          >
+            style={{ height: '100%' }}
+            {...this._panResponder.panHandlers}>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress = {() => {
+                this.state.handleTap();
+            }}
+            >
           <Animated.View
-            nativeID={"top-result-best-fit-label-conatiner"}
-            style={[
+            nativeID={"top-result-best-fit-label-container"}
+            style={
               {
                 height: this.state.labelHeightProgress.interpolate({
-                  inputRange: [ 0, 1],
+                  inputRange: [0, 1],
                   outputRange: [
                     PARAMETERS.TOP_LABEL_HEIGHT,
                     PARAMETERS.TOP_LABEL_HEIGHT_EXPANDED],
@@ -146,7 +140,7 @@ export default class TopResultView extends React.Component {
                 }),
                 flexDirection: 'column'
               }
-            ]}>
+            }>
           <View
               nativeID={"top-result-best-fit-label-data"}
               style={{
@@ -171,7 +165,6 @@ export default class TopResultView extends React.Component {
                     PARAMETERS.TOP_LABEL_EXPANDED_FONT_SIZE],
                   extrapolate:'clamp'
                 })
-
               }}>{Util.formatString(this.props.bestFitBrand) + " " + this.props.bestFitSize}
               </Animated.Text>
               <Text style={{
@@ -210,17 +203,9 @@ export default class TopResultView extends React.Component {
                 fontSize: 12
               }}>Height</Text>
             </View>
-            <TouchableOpacity
-              style={{
-                height: '100%',
-              }}
-              onPress = {() => {
-                this.state.handleTap();
-            }}
-            >
+
             <Animated.View style={[
                 {
-
                   transform: [
                     {
                       rotate : this.state.labelIconRotation
@@ -243,8 +228,6 @@ export default class TopResultView extends React.Component {
                  name='menu-down'
                  type='material-community'/>
             </Animated.View>
-          </TouchableOpacity>
-
           </View>
           </Animated.View>
           <Divider style={{ backgroundColor: 'grey' }} />
@@ -257,8 +240,8 @@ export default class TopResultView extends React.Component {
             allResultsCallback = {this.state.handleShowAll}
             labelHeightProgress = {this.state.labelHeightProgress}/>
           </TouchableOpacity>
-
+        </TouchableOpacity>
         </Animated.View>
-  </TouchableHighlight>);
+  </TouchableOpacity>);
   }
 }

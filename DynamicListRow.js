@@ -1,5 +1,6 @@
 import React from 'react';
 import {FlatList, View, StyleSheet, Text, Animated, Button} from 'react-native';
+import {Divider} from 'react-native-elements';
 import Util from './Util';
 
 const PARAMETERS = {
@@ -109,6 +110,7 @@ export default class DynamicListRow extends React.Component {
          <View style={[{flex: 1},styles.subtitle_container]}>
          {Util.fitIcon(sizeItem.height.fit, true)}
          </View>
+
          </Animated.View>
 
        );

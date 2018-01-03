@@ -1,5 +1,6 @@
 import React from 'react';
 import {FlatList, View, StyleSheet, Text, Animated, Button} from 'react-native';
+import {Divider} from 'react-native-elements';
 import Util from './Util';
 import DynamicListRow from './DynamicListRow';
 
@@ -11,7 +12,6 @@ const PARAMETERS = {
 export default class CloseFitList extends React.Component {
   constructor(props) {
     super(props);
-
       this.state = {
        renderCount: this.props.renderCount,
        loading     : true,
@@ -19,10 +19,8 @@ export default class CloseFitList extends React.Component {
        allResultsCallback: this.props.allResultsCallback,
        labelHeightProgress: this.props.labelHeightProgress
       };
-
       this.renderItem = this.renderItem.bind(this);
     }
-
 
    render() {
        return (
@@ -98,11 +96,11 @@ export default class CloseFitList extends React.Component {
         item={item}
         index={index}
         labelHeightProgress={this.state.labelHeightProgress}
-      />);
+      />
+    );
   }
 
   _keyExtractor= (item, index) => {
-    //console.log("key extractor for " + JSON.stringify(item));
     return (item.id+"-"+index)
   };
  }

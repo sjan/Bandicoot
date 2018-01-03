@@ -12,10 +12,10 @@ export default class ExploreSizeView extends React.Component {
     super(props);
     this.state = {
       showAll: {
-        PBT: false,
-        NEGRINI: false,
-        UHLMANN: false,
-        ALLSTAR: false
+        PBT: true,
+        NEGRINI: true,
+        UHLMANN: true,
+        ALLSTAR: true
       }
     };
   }
@@ -165,16 +165,6 @@ export default class ExploreSizeView extends React.Component {
               }).map((sizeItem, j) => (<SizeListItem key={j} chestFit={sizeItem.chest.fit} waistFit={sizeItem.waist.fit} hipFit={sizeItem.hip.fit} heightFit={sizeItem.height.fit} label={sizeItem.brand + " " + sizeItem.size}></SizeListItem>))
             }
           </List>
-          <View style={{
-              flex: 1,
-              alignItems: 'center',
-              margin: 12,
-              justifyContent: 'center'
-            }}>
-            <Button small="small" borderRadius={3} title={this.hideShowButton(brandItem.brand)} onPress={(val) => {
-                this.setState(this.enableBrand(brandItem.brand))
-              }}/>
-          </View>
         </View>))
       }
     </ScrollView>);
